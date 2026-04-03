@@ -1,0 +1,87 @@
+# ─── Dependencies ────────────────────────────────────────────────────────────
+node_modules/
+.pnp
+.pnp.js
+.yarn/install-state.gz
+
+# ─── Next.js build output ────────────────────────────────────────────────────
+.next/
+out/
+build/
+dist/
+
+# ─── Environment variables ────────────────────────────────────────────────────
+# Never commit secrets — use .env.local for local overrides
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+# Safe to commit (no secrets):
+# .env.example
+# .env.production  ← only if it contains no secrets
+
+# ─── TypeScript ───────────────────────────────────────────────────────────────
+*.tsbuildinfo
+next-env.d.ts
+
+# ─── Testing ──────────────────────────────────────────────────────────────────
+coverage/
+.nyc_output/
+
+# ─── Linting / formatting ─────────────────────────────────────────────────────
+.eslintcache
+.stylelintcache
+
+# ─── OS & editor artifacts ────────────────────────────────────────────────────
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+
+# VS Code
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# JetBrains (WebStorm / IntelliJ)
+.idea/
+*.iml
+
+# Vim / Emacs
+*.swp
+*.swo
+*~
+\#*\#
+
+# ─── Vercel ───────────────────────────────────────────────────────────────────
+.vercel
+
+# ─── Tailwind ─────────────────────────────────────────────────────────────────
+# Tailwind generates no build artifacts — nothing to ignore here
+
+# ─── Package manager lock files ───────────────────────────────────────────────
+# Keep ONE lock file (whichever your team uses) and ignore the others
+# Uncomment the lines for lock files you DON'T use:
+# package-lock.json   # keep if using npm
+# yarn.lock           # keep if using yarn
+# pnpm-lock.yaml      # keep if using pnpm
+
+# ─── Misc ─────────────────────────────────────────────────────────────────────
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.cache/
+tmp/
+temp/

@@ -1,0 +1,95 @@
+/* Tailwind base layers
+   NOTE: @tailwind base is intentionally omitted here because we disabled
+   Tailwind's preflight in tailwind.config.ts. MUI's CssBaseline handles
+   the CSS reset instead. Only utilities and components are injected. */
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Design tokens ────────────────────────────────────────────────────────
+   These mirror the values in lib/theme.ts and tailwind.config.ts so that
+   both MUI sx props and Tailwind utility classes resolve to the same values.
+   ───────────────────────────────────────────────────────────────────────── */
+:root {
+  --color-ink: #1a1a2e;
+  --color-ink-soft: #4a4a6a;
+  --color-ink-muted: #8888a8;
+
+  --color-cream: #faf9f6;
+  --color-cream-dark: #f0ede6;
+
+  --color-teal: #2d8a7a;
+  --color-teal-light: #e1f2ef;
+  --color-teal-dark: #1f6257;
+
+  --color-rose: #c4596a;
+  --color-rose-light: #faeaec;
+
+  --color-gold: #c8a96e;
+  --color-gold-light: #e8d5a8;
+
+  --color-blue: #3a6ea8;
+  --color-blue-light: #e8f0fa;
+
+  --color-green: #2d8a4a;
+  --color-green-light: #e1f2e8;
+
+  --font-sans: "DM Sans", system-ui, sans-serif;
+  --font-serif: "DM Serif Display", Georgia, serif;
+
+  --radius: 12px;
+  --radius-sm: 8px;
+  --radius-pill: 100px;
+}
+
+/* ─── Typography helpers ────────────────────────────────────────────────── */
+.font-serif {
+  font-family: var(--font-serif);
+}
+
+/* ─── Scrollbar ─────────────────────────────────────────────────────────── */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(26, 26, 46, 0.15) transparent;
+}
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+*::-webkit-scrollbar-thumb {
+  background: rgba(26, 26, 46, 0.15);
+  border-radius: 100px;
+}
+
+/* ─── Tailwind component layer examples ─────────────────────────────────── 
+   Use @layer components for reusable patterns that need to compose
+   multiple Tailwind utilities. These work alongside MUI components.      */
+@layer components {
+  /* Stat badge — used in hero / landing sections */
+  .stat-badge {
+    @apply rounded-[--radius-sm] bg-cream-dark px-3 py-2 text-center;
+  }
+
+  /* Section label — small uppercase overline above headings */
+  .section-overline {
+    @apply text-xs font-semibold uppercase tracking-widest text-teal-DEFAULT;
+  }
+
+  /* Card hover lift — apply alongside MUI Card for hover effect */
+  .card-lift {
+    @apply transition-transform duration-200 hover:-translate-y-1;
+  }
+
+  /* Progress pill — thin colored bar */
+  .progress-pill {
+    @apply h-1.5 w-full overflow-hidden rounded-full bg-cream-dark;
+  }
+
+  /* Sidebar nav item base (utility composition for non-MUI contexts) */
+  .nav-item {
+    @apply flex items-center gap-2 rounded-sm px-3 py-2 text-sm
+           text-white/60 transition-colors hover:bg-white/10 hover:text-white/90;
+  }
+  .nav-item-active {
+    @apply bg-teal-light/20 text-teal-DEFAULT;
+  }
+}
