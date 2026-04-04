@@ -47,16 +47,16 @@ export default function CoursesPage() {
   return (
     <DashboardLayout>
       {/* Header */}
-      <Box sx={{ px: 3, py: 2, bgcolor: 'background.paper', borderBottom: '1px solid', borderColor: 'divider', position: 'sticky', top: 0, zIndex: 40 }}>
-        <Typography variant="h4" sx={{ fontSize: '1.35rem' }}>{t('title')}</Typography>
+      <Box sx={{ px: { xs: 2, md: 3 }, py: 2, bgcolor: 'background.paper', borderBottom: '1px solid', borderColor: 'divider', position: 'sticky', top: 0, zIndex: 40 }}>
+        <Typography variant="h4" sx={{ fontSize: { xs: '1.1rem', md: '1.35rem' } }}>{t('title')}</Typography>
         <Typography variant="caption" sx={{ color: 'text.secondary' }}>
           {t('coursesAvailable', { count: COURSES.length, enrolled: COURSES.filter(c => c.progress > 0).length })}
         </Typography>
       </Box>
 
-      <Box sx={{ p: 3 }}>
+      <Box sx={{ p: { xs: 2, md: 3 } }}>
         {/* Tabs */}
-        <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 3, borderBottom: '1px solid', borderColor: 'divider' }}>
+        <Tabs value={tab} onChange={(_, v) => setTab(v)} variant="scrollable" scrollButtons="auto" sx={{ mb: 3, borderBottom: '1px solid', borderColor: 'divider' }}>
           <Tab label={t('allCourses')} />
           <Tab label={t('myCourses', { count: COURSES.filter(c => c.progress > 0).length })} />
         </Tabs>

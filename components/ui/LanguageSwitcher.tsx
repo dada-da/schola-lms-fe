@@ -24,7 +24,11 @@ export default function LanguageSwitcher() {
       sx={{
         fontSize: '0.8rem',
         height: 32,
+        color: 'inherit',
         '& .MuiSelect-select': { py: 0.5, px: 1.5 },
+        '& .MuiSvgIcon-root': { color: 'inherit' },
+        '& .MuiOutlinedInput-notchedOutline': { borderColor: 'currentColor', opacity: 0.3 },
+        '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'currentColor', opacity: 0.6 },
       }}
     >
       {routing.locales.map((loc) => (

@@ -54,7 +54,7 @@ export default function QuizPage() {
 
   if (phase === 'intro') return (
     <DashboardLayout>
-      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'center', p: 6 }}>
+      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'center', p: { xs: 2, md: 6 } }}>
         <Card sx={{ maxWidth: 500, width: '100%' }}><CardContent sx={{ p: 4, textAlign: 'center' }}>
           <Typography sx={{ fontSize: '3rem', mb: 1.5 }}>📝</Typography>
           <Chip label={t('moduleQuiz')} size="small" color="primary" sx={{ mb: 2 }} />
@@ -83,7 +83,7 @@ export default function QuizPage() {
 
   if (phase === 'results') return (
     <DashboardLayout>
-      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'center', p: 6 }}>
+      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'center', p: { xs: 2, md: 6 } }}>
         <Card sx={{ maxWidth: 500, width: '100%' }}><CardContent sx={{ p: 4, textAlign: 'center' }}>
           <Typography sx={{ fontSize: '3rem', mb: 1.5 }}>{passed ? '🎉' : '😔'}</Typography>
           <Chip label={passed ? t('passed') : t('notQuite')} size="small" color={passed ? 'success' : 'error'} sx={{ mb: 2 }} />
@@ -117,8 +117,8 @@ export default function QuizPage() {
   return (
     <DashboardLayout>
       {/* Quiz header */}
-      <Box sx={{ px: 3, py: 1.5, bgcolor: 'background.paper', borderBottom: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 2, position: 'sticky', top: 0, zIndex: 40 }}>
-        <Typography variant="body2" sx={{ color: 'text.secondary', flexShrink: 0 }}>{t('title')}</Typography>
+      <Box sx={{ px: { xs: 2, md: 3 }, py: 1.5, bgcolor: 'background.paper', borderBottom: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center', gap: { xs: 1, md: 2 }, position: 'sticky', top: 0, zIndex: 40 }}>
+        <Typography variant="body2" sx={{ color: 'text.secondary', flexShrink: 0, display: { xs: 'none', sm: 'block' } }}>{t('title')}</Typography>
         <LinearProgress variant="determinate" value={((currentQ + 1) / QUESTIONS.length) * 100} sx={{ flex: 1 }} color="primary" />
         <Typography variant="caption" sx={{ color: 'text.secondary', flexShrink: 0 }}>{currentQ + 1} / {QUESTIONS.length}</Typography>
         <Chip
@@ -128,7 +128,7 @@ export default function QuizPage() {
         />
       </Box>
 
-      <Box sx={{ p: 3, maxWidth: 960, mx: 'auto' }}>
+      <Box sx={{ p: { xs: 2, md: 3 }, maxWidth: 960, mx: 'auto' }}>
         <Grid container spacing={2} alignItems="flex-start">
           <Grid item xs={12} md={8}>
             <Card><CardContent sx={{ p: 3 }}>

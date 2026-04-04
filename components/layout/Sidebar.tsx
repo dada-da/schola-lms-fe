@@ -2,6 +2,7 @@
 import { usePathname, useRouter } from '@/i18n/navigation'
 import { useTranslations } from 'next-intl'
 import Box from '@mui/material/Box'
+import Drawer from '@mui/material/Drawer'
 import List from '@mui/material/List'
 import ListItemButton from '@mui/material/ListItemButton'
 import ListItemIcon from '@mui/material/ListItemIcon'
@@ -24,14 +25,20 @@ import LanguageSwitcher from '@/components/ui/LanguageSwitcher'
 
 const DRAWER_WIDTH = 224
 
-export default function Sidebar() {
+type NavSection = { section: string }
+type NavItem = { label: string; icon: React.ReactNode; href: string }
+type NavEntry = NavSection | NavItem
+
+export default function Sidebar({
+  mobileOpen = false,
+  onMobileClose,
+}: {
+  mobileOpen?: boolean
+  onMobileClose?: () => void
+}) {
   const pathname = usePathname()
   const router = useRouter()
   const t = useTranslations('sidebar')
-
-  type NavSection = { section: string }
-  type NavItem = { label: string; icon: React.ReactNode; href: string }
-  type NavEntry = NavSection | NavItem
 
   const NAV: NavEntry[] = [
     { section: t('main') },
@@ -53,19 +60,21 @@ export default function Sidebar() {
     { label: t('settings'), icon: <SettingsOutlinedIcon fontSize="small" />, href: '#' },
   ]
 
-  return (
+  const handleNav = (href: string) => {
+    if (href !== '#') {
+      router.push(href)
+      onMobileClose?.()
+    }
+  }
+
+  const content = (
     <Box
-      component="nav"
       sx={{
         width: DRAWER_WIDTH,
-        flexShrink: 0,
         bgcolor: 'secondary.main',
         display: 'flex',
         flexDirection: 'column',
-        height: '100vh',
-        position: 'sticky',
-        top: 0,
-        overflow: 'hidden',
+        height: '100%',
         py: 2,
         px: 1,
       }}
@@ -74,7 +83,7 @@ export default function Sidebar() {
       <Box sx={{ px: 1.5, mb: 3 }}>
         <Typography
           sx={{ fontFamily: '"DM Serif Display", Georgia, serif', fontSize: '1.25rem', color: '#fff', cursor: 'pointer' }}
-          onClick={() => router.push('/')}
+          onClick={() => { router.push('/'); onMobileClose?.() }}
         >
           Schola<Box component="span" sx={{ color: 'primary.main' }}>LMS</Box>
         </Typography>
@@ -100,7 +109,7 @@ export default function Sidebar() {
             <ListItemButton
               key={navItem.label}
               selected={active}
-              onClick={() => navItem.href !== '#' && router.push(navItem.href)}
+              onClick={() => handleNav(navItem.href)}
               sx={{
                 color: active ? 'primary.main' : 'rgba(255,255,255,0.55)',
                 '&:hover': { color: 'rgba(255,255,255,0.9)', bgcolor: 'rgba(255,255,255,0.07)' },
@@ -124,7 +133,7 @@ export default function Sidebar() {
               <ListItemButton
                 key={item.label}
                 selected={active}
-                onClick={() => item.href !== '#' && router.push(item.href)}
+                onClick={() => handleNav(item.href)}
                 sx={{
                   color: active ? 'primary.main' : 'rgba(255,255,255,0.55)',
                   '&:hover': { color: 'rgba(255,255,255,0.9)', bgcolor: 'rgba(255,255,255,0.07)' },
@@ -149,5 +158,39 @@ export default function Sidebar() {
         </Box>
       </Box>
     </Box>
+  )
+
+  return (
+    <>
+      {/* Desktop: permanent sidebar */}
+      <Box
+        component="nav"
+        sx={{
+          display: { xs: 'none', md: 'block' },
+          width: DRAWER_WIDTH,
+          flexShrink: 0,
+          height: '100vh',
+          position: 'sticky',
+          top: 0,
+          overflow: 'hidden',
+        }}
+      >
+        {content}
+      </Box>
+
+      {/* Mobile: temporary drawer */}
+      <Drawer
+        variant="temporary"
+        open={mobileOpen}
+        onClose={onMobileClose}
+        ModalProps={{ keepMounted: true }}
+        sx={{
+          display: { xs: 'block', md: 'none' },
+          '& .MuiDrawer-paper': { width: DRAWER_WIDTH, border: 'none' },
+        }}
+      >
+        {content}
+      </Drawer>
+    </>
   )
 }

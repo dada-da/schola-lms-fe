@@ -1,4 +1,5 @@
 'use client'
+import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from '@/i18n/navigation'
 import Box from '@mui/material/Box'
@@ -10,8 +11,16 @@ import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
 import Chip from '@mui/material/Chip'
 import LinearProgress from '@mui/material/LinearProgress'
+import IconButton from '@mui/material/IconButton'
+import Drawer from '@mui/material/Drawer'
+import List from '@mui/material/List'
+import ListItemButton from '@mui/material/ListItemButton'
+import ListItemText from '@mui/material/ListItemText'
+import Divider from '@mui/material/Divider'
 import StarRateRoundedIcon from '@mui/icons-material/StarRateRounded'
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
+import MenuIcon from '@mui/icons-material/Menu'
+import CloseIcon from '@mui/icons-material/Close'
 import LanguageSwitcher from '@/components/ui/LanguageSwitcher'
 import { COURSES } from '@/lib/data'
 
@@ -35,6 +44,7 @@ export default function Home() {
   const router = useRouter()
   const t = useTranslations('landing')
   const tc = useTranslations('common')
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const PLANS = [
     { nameKey: 'starter', featured: false },
@@ -45,11 +55,12 @@ export default function Home() {
   return (
     <Box sx={{ bgcolor: '#faf9f6' }}>
       {/* Nav */}
-      <Box component="nav" sx={{ position: 'sticky', top: 0, zIndex: 100, bgcolor: '#faf9f6', borderBottom: '1px solid rgba(26,26,46,0.08)', px: 4, py: 1.5, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <Box component="nav" sx={{ position: 'sticky', top: 0, zIndex: 100, bgcolor: '#faf9f6', borderBottom: '1px solid rgba(26,26,46,0.08)', px: { xs: 2, md: 4 }, py: 1.5, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <Typography sx={{ fontFamily: '"DM Serif Display",serif', fontSize: '1.4rem', color: 'secondary.main' }}>
           Schola<Box component="span" sx={{ color: 'primary.main' }}>LMS</Box>
         </Typography>
-        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+        {/* Desktop nav */}
+        <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 2, alignItems: 'center' }}>
           {[
             { label: tc('features'), href: '#features' },
             { label: tc('courses'), href: '#courses' },
@@ -61,10 +72,40 @@ export default function Home() {
           <Button variant="outlined" size="small" color="secondary" onClick={() => router.push('/dashboard')}>{tc('signIn')}</Button>
           <Button variant="contained" size="small" color="primary" onClick={() => router.push('/dashboard')}>{tc('startFree')}</Button>
         </Box>
+        {/* Mobile hamburger */}
+        <IconButton sx={{ display: { xs: 'flex', md: 'none' } }} onClick={() => setMobileMenuOpen(true)}>
+          <MenuIcon />
+        </IconButton>
+        <Drawer anchor="right" open={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} sx={{ display: { xs: 'block', md: 'none' }, '& .MuiDrawer-paper': { width: 260 } }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', px: 2, py: 1.5 }}>
+            <Typography sx={{ fontFamily: '"DM Serif Display",serif', fontSize: '1.2rem', color: 'secondary.main' }}>
+              Schola<Box component="span" sx={{ color: 'primary.main' }}>LMS</Box>
+            </Typography>
+            <IconButton onClick={() => setMobileMenuOpen(false)}><CloseIcon /></IconButton>
+          </Box>
+          <Divider />
+          <List>
+            {[
+              { label: tc('features'), href: '#features' },
+              { label: tc('courses'), href: '#courses' },
+              { label: tc('pricing'), href: '#pricing' },
+            ].map(l => (
+              <ListItemButton key={l.href} component="a" href={l.href} onClick={() => setMobileMenuOpen(false)}>
+                <ListItemText primary={l.label} />
+              </ListItemButton>
+            ))}
+          </List>
+          <Divider />
+          <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+            <LanguageSwitcher />
+            <Button fullWidth variant="outlined" color="secondary" onClick={() => { router.push('/dashboard'); setMobileMenuOpen(false) }}>{tc('signIn')}</Button>
+            <Button fullWidth variant="contained" color="primary" onClick={() => { router.push('/dashboard'); setMobileMenuOpen(false) }}>{tc('startFree')}</Button>
+          </Box>
+        </Drawer>
       </Box>
 
       {/* Hero */}
-      <Container maxWidth="lg" sx={{ pt: 10, pb: 8 }}>
+      <Container maxWidth="lg" sx={{ pt: { xs: 5, md: 10 }, pb: { xs: 5, md: 8 }, px: { xs: 2, md: 3 } }}>
         <Grid container spacing={6} alignItems="center">
           <Grid item xs={12} md={6}>
             <Chip label={t('aiTutoringChip')} size="small" sx={{ bgcolor: '#e1f2ef', color: '#1f6257', mb: 2, fontWeight: 600 }} />
@@ -126,7 +167,7 @@ export default function Home() {
       <Box id="features" sx={{ bgcolor: '#f0ede6', py: 8 }}>
         <Container maxWidth="lg">
           <Typography variant="overline" sx={{ color: 'primary.main', display: 'block', mb: 0.75 }}>{t('whySchola')}</Typography>
-          <Typography variant="h2" sx={{ fontSize: '2.4rem', mb: 5 }}>{t('everythingModernLearner')}</Typography>
+          <Typography variant="h2" sx={{ fontSize: { xs: '1.8rem', md: '2.4rem' }, mb: { xs: 3, md: 5 } }}>{t('everythingModernLearner')}</Typography>
           <Grid container spacing={2}>
             {FEATURE_KEYS.map(f => (
               <Grid item xs={12} sm={6} md={4} key={f.key}>
@@ -147,7 +188,7 @@ export default function Home() {
       <Box id="courses" sx={{ py: 8 }}>
         <Container maxWidth="lg">
           <Typography variant="overline" sx={{ color: 'primary.main', display: 'block', mb: 0.75 }}>{t('featuredCourses')}</Typography>
-          <Typography variant="h2" sx={{ fontSize: '2.4rem', mb: 4 }}>{t('learnWhatMatters')}</Typography>
+          <Typography variant="h2" sx={{ fontSize: { xs: '1.8rem', md: '2.4rem' }, mb: { xs: 2.5, md: 4 } }}>{t('learnWhatMatters')}</Typography>
           <Grid container spacing={2}>
             {COURSES.slice(0, 3).map(c => (
               <Grid item xs={12} sm={6} md={4} key={c.id}>
@@ -182,7 +223,7 @@ export default function Home() {
           <Grid container spacing={3}>
             {STAT_KEYS.map(s => (
               <Grid item xs={6} md={3} key={s.key} sx={{ textAlign: 'center' }}>
-                <Typography sx={{ fontFamily: '"DM Serif Display",serif', fontSize: '2.6rem', color: '#fff' }}>{s.num}</Typography>
+                <Typography sx={{ fontFamily: '"DM Serif Display",serif', fontSize: { xs: '1.8rem', md: '2.6rem' }, color: '#fff' }}>{s.num}</Typography>
                 <Typography sx={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.45)', mt: 0.25 }}>{t(`stats.${s.key}`)}</Typography>
               </Grid>
             ))}
@@ -194,7 +235,7 @@ export default function Home() {
       <Box id="pricing" sx={{ py: 8 }}>
         <Container maxWidth="lg">
           <Typography variant="overline" sx={{ color: 'primary.main', display: 'block', mb: 0.75, textAlign: 'center' }}>{t('pricingSection')}</Typography>
-          <Typography variant="h2" sx={{ fontSize: '2.4rem', mb: 5, textAlign: 'center' }}>{t('simplePlans')}</Typography>
+          <Typography variant="h2" sx={{ fontSize: { xs: '1.8rem', md: '2.4rem' }, mb: { xs: 3, md: 5 }, textAlign: 'center' }}>{t('simplePlans')}</Typography>
           <Grid container spacing={2} alignItems="stretch">
             {PLANS.map(p => {
               const features: string[] = t.raw(`plans.${p.nameKey}Features`)

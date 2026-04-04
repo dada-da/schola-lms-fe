@@ -86,9 +86,9 @@ export default function AdminPage() {
 
   return (
     <DashboardLayout>
-      <Box sx={{ px: 3, py: 1.75, bgcolor: 'background.paper', borderBottom: '1px solid', borderColor: 'divider', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, zIndex: 40 }}>
+      <Box sx={{ px: { xs: 2, md: 3 }, py: 1.75, bgcolor: 'background.paper', borderBottom: '1px solid', borderColor: 'divider', display: 'flex', justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, flexDirection: { xs: 'column', sm: 'row' }, gap: 1, position: 'sticky', top: 0, zIndex: 40 }}>
         <Box>
-          <Typography variant="h4" sx={{ fontSize: '1.35rem' }}>{t('title')}</Typography>
+          <Typography variant="h4" sx={{ fontSize: { xs: '1.1rem', md: '1.35rem' } }}>{t('title')}</Typography>
           <Typography variant="caption" sx={{ color: 'text.secondary' }}>{t('subtitle')}</Typography>
         </Box>
         <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center' }}>
@@ -101,7 +101,7 @@ export default function AdminPage() {
         </Box>
       </Box>
 
-      <Box sx={{ p: 3 }}>
+      <Box sx={{ p: { xs: 2, md: 3 } }}>
         {/* KPIs */}
         <Grid container spacing={1.5} sx={{ mb: 2 }}>
           {KPIS.map(m => (
@@ -172,7 +172,8 @@ export default function AdminPage() {
                 <Typography variant="subtitle2">{t('recentSignups')}</Typography>
                 <Typography variant="caption" sx={{ color: 'primary.main', cursor: 'pointer' }}>{tc('viewAllUsers')}</Typography>
               </Box>
-              <Table size="small">
+              <Box sx={{ overflowX: 'auto' }}>
+              <Table size="small" sx={{ minWidth: 560 }}>
                 <TableHead>
                   <TableRow>
                     <TableCell>{t('tableUser')}</TableCell>
@@ -202,6 +203,7 @@ export default function AdminPage() {
                   ))}
                 </TableBody>
               </Table>
+              </Box>
             </CardContent></Card>
           </Grid>
           <Grid item xs={12} md={5}>

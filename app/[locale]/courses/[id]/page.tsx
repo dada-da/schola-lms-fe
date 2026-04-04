@@ -73,26 +73,26 @@ export default function CourseDetail() {
 
   return (
     <DashboardLayout>
-      <Box sx={{ px: 3, py: 1.75, bgcolor: 'background.paper', borderBottom: '1px solid', borderColor: 'divider', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, zIndex: 40 }}>
-        <Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.25 }}>
+      <Box sx={{ px: { xs: 2, md: 3 }, py: 1.75, bgcolor: 'background.paper', borderBottom: '1px solid', borderColor: 'divider', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 1, position: 'sticky', top: 0, zIndex: 40 }}>
+        <Box sx={{ minWidth: 0 }}>
+          <Box sx={{ display: { xs: 'none', sm: 'flex' }, alignItems: 'center', gap: 0.5, mb: 0.25 }}>
             <Typography variant="caption" sx={{ color: 'text.secondary', cursor: 'pointer', '&:hover': { color: 'primary.main' } }} onClick={() => router.push('/dashboard')}>{t('dashboard')}</Typography>
             <Typography variant="caption" sx={{ color: 'text.disabled' }}>›</Typography>
             <Typography variant="caption" sx={{ color: 'text.secondary', cursor: 'pointer', '&:hover': { color: 'primary.main' } }} onClick={() => router.push('/courses')}>{t('courses')}</Typography>
             <Typography variant="caption" sx={{ color: 'text.disabled' }}>›</Typography>
-            <Typography variant="caption">{course.title}</Typography>
+            <Typography variant="caption" noWrap>{course.title}</Typography>
           </Box>
-          <Typography variant="h4" sx={{ fontSize: '1.25rem' }}>{course.title}</Typography>
+          <Typography variant="h4" sx={{ fontSize: { xs: '1rem', md: '1.25rem' } }} noWrap>{course.title}</Typography>
         </Box>
-        <Button variant="contained" color="primary" size="small" onClick={() => router.push(`/quiz/${course.id}`)}>{t('takeQuiz')}</Button>
+        <Button variant="contained" color="primary" size="small" sx={{ flexShrink: 0 }} onClick={() => router.push(`/quiz/${course.id}`)}>{t('takeQuiz')}</Button>
       </Box>
 
-      <Box sx={{ p: 3 }}>
+      <Box sx={{ p: { xs: 2, md: 3 } }}>
         <Grid container spacing={2} alignItems="flex-start">
           <Grid item xs={12} md={8}>
             {/* Video player */}
             <Card sx={{ mb: 2, overflow: 'hidden' }}>
-              <Box sx={{ height: 280, bgcolor: 'secondary.main', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 1.5, position: 'relative', background: 'linear-gradient(135deg, #1a1a2e 0%, #2d3a5e 100%)' }}>
+              <Box sx={{ height: { xs: 200, md: 280 }, bgcolor: 'secondary.main', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 1.5, position: 'relative', background: 'linear-gradient(135deg, #1a1a2e 0%, #2d3a5e 100%)' }}>
                 <Box sx={{ position: 'absolute', top: -40, right: -40, width: 200, height: 200, bgcolor: 'primary.main', opacity: 0.1, borderRadius: '50%' }} />
                 <Box sx={{ width: 60, height: 60, borderRadius: '50%', bgcolor: 'rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'background 0.2s', '&:hover': { bgcolor: 'primary.main' } }}>
                   <PlayCircleOutlineIcon sx={{ fontSize: 28, color: '#fff' }} />
@@ -111,7 +111,7 @@ export default function CourseDetail() {
             </Card>
 
             {/* Tabs */}
-            <Tabs value={activeTab} onChange={(_, v) => setActiveTab(v)} sx={{ mb: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
+            <Tabs value={activeTab} onChange={(_, v) => setActiveTab(v)} variant="scrollable" scrollButtons="auto" sx={{ mb: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
               {[t('overview'), t('curriculum'), t('discussion'), t('resources')].map(label => <Tab key={label} label={label} />)}
             </Tabs>
 
