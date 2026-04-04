@@ -1,5 +1,6 @@
 'use client'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname, useRouter } from '@/i18n/navigation'
+import { useTranslations } from 'next-intl'
 import Box from '@mui/material/Box'
 import List from '@mui/material/List'
 import ListItemButton from '@mui/material/ListItemButton'
@@ -19,32 +20,38 @@ import GroupsOutlinedIcon from '@mui/icons-material/GroupsOutlined'
 import ChatBubbleOutlineOutlinedIcon from '@mui/icons-material/ChatBubbleOutlineOutlined'
 import AdminPanelSettingsOutlinedIcon from '@mui/icons-material/AdminPanelSettingsOutlined'
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined'
+import LanguageSwitcher from '@/components/ui/LanguageSwitcher'
 
 const DRAWER_WIDTH = 224
-
-const NAV = [
-  { section: 'Main' },
-  { label: 'Overview', icon: <DashboardOutlinedIcon fontSize="small" />, href: '/dashboard' },
-  { label: 'My Courses', icon: <MenuBookOutlinedIcon fontSize="small" />, href: '/courses' },
-  { label: 'Schedule', icon: <CalendarTodayOutlinedIcon fontSize="small" />, href: '#' },
-  { label: 'AI Tutor', icon: <SmartToyOutlinedIcon fontSize="small" />, href: '#' },
-  { section: 'Progress' },
-  { label: 'Analytics', icon: <BarChartOutlinedIcon fontSize="small" />, href: '#' },
-  { label: 'Certificates', icon: <EmojiEventsOutlinedIcon fontSize="small" />, href: '#' },
-  { label: 'Goals', icon: <TrackChangesOutlinedIcon fontSize="small" />, href: '#' },
-  { section: 'Community' },
-  { label: 'Cohorts', icon: <GroupsOutlinedIcon fontSize="small" />, href: '#' },
-  { label: 'Discussions', icon: <ChatBubbleOutlineOutlinedIcon fontSize="small" />, href: '#' },
-]
-
-const BOTTOM_NAV = [
-  { label: 'Admin', icon: <AdminPanelSettingsOutlinedIcon fontSize="small" />, href: '/admin' },
-  { label: 'Settings', icon: <SettingsOutlinedIcon fontSize="small" />, href: '#' },
-]
 
 export default function Sidebar() {
   const pathname = usePathname()
   const router = useRouter()
+  const t = useTranslations('sidebar')
+
+  type NavSection = { section: string }
+  type NavItem = { label: string; icon: React.ReactNode; href: string }
+  type NavEntry = NavSection | NavItem
+
+  const NAV: NavEntry[] = [
+    { section: t('main') },
+    { label: t('overview'), icon: <DashboardOutlinedIcon fontSize="small" />, href: '/dashboard' },
+    { label: t('myCourses'), icon: <MenuBookOutlinedIcon fontSize="small" />, href: '/courses' },
+    { label: t('schedule'), icon: <CalendarTodayOutlinedIcon fontSize="small" />, href: '#' },
+    { label: t('aiTutor'), icon: <SmartToyOutlinedIcon fontSize="small" />, href: '#' },
+    { section: t('progressSection') },
+    { label: t('analytics'), icon: <BarChartOutlinedIcon fontSize="small" />, href: '#' },
+    { label: t('certificates'), icon: <EmojiEventsOutlinedIcon fontSize="small" />, href: '#' },
+    { label: t('goals'), icon: <TrackChangesOutlinedIcon fontSize="small" />, href: '#' },
+    { section: t('communitySection') },
+    { label: t('cohorts'), icon: <GroupsOutlinedIcon fontSize="small" />, href: '#' },
+    { label: t('discussions'), icon: <ChatBubbleOutlineOutlinedIcon fontSize="small" />, href: '#' },
+  ]
+
+  const BOTTOM_NAV = [
+    { label: t('admin'), icon: <AdminPanelSettingsOutlinedIcon fontSize="small" />, href: '/admin' },
+    { label: t('settings'), icon: <SettingsOutlinedIcon fontSize="small" />, href: '#' },
+  ]
 
   return (
     <Box
@@ -87,20 +94,21 @@ export default function Sidebar() {
               </Typography>
             )
           }
-          const active = item.href !== '#' && pathname.startsWith(item.href)
+          const navItem = item as NavItem
+          const active = navItem.href !== '#' && pathname.startsWith(navItem.href)
           return (
             <ListItemButton
-              key={item.label}
+              key={navItem.label}
               selected={active}
-              onClick={() => item.href !== '#' && router.push(item.href)}
+              onClick={() => navItem.href !== '#' && router.push(navItem.href)}
               sx={{
                 color: active ? 'primary.main' : 'rgba(255,255,255,0.55)',
                 '&:hover': { color: 'rgba(255,255,255,0.9)', bgcolor: 'rgba(255,255,255,0.07)' },
                 '&.Mui-selected': { bgcolor: 'rgba(45,138,122,0.18)', color: 'primary.main' },
               }}
             >
-              <ListItemIcon sx={{ color: 'inherit', minWidth: 32 }}>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.label} primaryTypographyProps={{ fontSize: '0.875rem', fontWeight: active ? 500 : 400 }} />
+              <ListItemIcon sx={{ color: 'inherit', minWidth: 32 }}>{navItem.icon}</ListItemIcon>
+              <ListItemText primary={navItem.label} primaryTypographyProps={{ fontSize: '0.875rem', fontWeight: active ? 500 : 400 }} />
             </ListItemButton>
           )
         })}
@@ -129,11 +137,14 @@ export default function Sidebar() {
             )
           })}
         </List>
+        <Box sx={{ px: 1.5, pt: 1, mb: 1 }}>
+          <LanguageSwitcher />
+        </Box>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, px: 1.5, pt: 1.5, mt: 0.5, borderTop: '1px solid rgba(255,255,255,0.08)' }}>
           <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.main', fontSize: '0.72rem', fontWeight: 600 }}>AM</Avatar>
           <Box>
             <Typography sx={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.85)', fontWeight: 500, lineHeight: 1.2 }}>Alex Minh</Typography>
-            <Typography sx={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.35)', lineHeight: 1.2 }}>Pro learner</Typography>
+            <Typography sx={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.35)', lineHeight: 1.2 }}>{t('proLearner')}</Typography>
           </Box>
         </Box>
       </Box>

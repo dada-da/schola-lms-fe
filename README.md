@@ -99,10 +99,3 @@ Or use React Query / SWR for client-side fetching:
 import useSWR from 'swr'
 const { data } = useSWR('/api/courses', fetcher)
 ```
-
-## Recommended backend
-
-- **Supabase** — Postgres + Auth + Storage
-- **Directus** — Headless CMS with REST/GraphQL
-- **Strapi** — Self-hosted headless CMS
-- **Next.js API routes** — `app/api/` for custom endpoints

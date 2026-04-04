@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find /Users/solis/development/personal/schola-lms-next -name *i18n* -o -name *translation* -o -name *locale* -o -name *lang*)",
+      "Bash(npm install:*)",
+      "Bash(mkdir -p app/[locale])",
+      "Bash(mv app/dashboard app/[locale]/dashboard)",
+      "Bash(mv app/courses app/[locale]/courses)",
+      "Bash(mv app/quiz app/[locale]/quiz)",
+      "Bash(mv app/admin app/[locale]/admin)",
+      "Bash(pnpm add:*)",
+      "Bash(cp app/[locale]/dashboard/loading.tsx app/[locale]/dashboard/loading.tsx)",
+      "Bash(ls app/[locale]/dashboard/)",
+      "Bash(pnpm build:*)"
+    ]
+  }
+}

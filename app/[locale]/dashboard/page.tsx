@@ -1,6 +1,6 @@
 'use client'
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
+import { useRouter } from '@/i18n/navigation'
 import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
 import Card from '@mui/material/Card'
@@ -13,13 +13,6 @@ import Chip from '@mui/material/Chip'
 import DashboardLayout from '@/components/layout/DashboardLayout'
 import { COURSES } from '@/lib/data'
 
-const METRICS = [
-  { label: 'Hours this week', value: '14.5', delta: '↑ 18% vs last week', up: true },
-  { label: 'Courses in progress', value: '4', delta: '↑ 1 new this month', up: true },
-  { label: 'Avg. quiz score', value: '87%', delta: '↑ 5pts improvement', up: true },
-  { label: 'Day streak', value: '23 🔥', delta: 'Personal best!', up: true },
-]
-const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 const ACTIVITY = [1.5, 2.2, 3.0, 2.5, 3.8, 1.2, 0.3]
 const MAX_ACT = Math.max(...ACTIVITY)
 
@@ -48,17 +41,28 @@ const CERTS = [
 
 export default function Dashboard() {
   const router = useRouter()
+  const t = useTranslations('dashboard')
+  const tc = useTranslations('common')
   const inProgress = COURSES.filter(c => c.progress > 0 && c.progress < 100)
+
+  const METRICS = [
+    { label: t('hoursThisWeek'), value: '14.5', delta: '↑ 18% vs last week', up: true },
+    { label: t('coursesInProgress'), value: '4', delta: '↑ 1 new this month', up: true },
+    { label: t('avgQuizScore'), value: '87%', delta: '↑ 5pts improvement', up: true },
+    { label: t('dayStreak'), value: '23 🔥', delta: t('personalBest'), up: true },
+  ]
+
+  const DAYS = [t('days.mon'), t('days.tue'), t('days.wed'), t('days.thu'), t('days.fri'), t('days.sat'), t('days.sun')]
 
   return (
     <DashboardLayout>
       {/* Header */}
       <Box sx={{ px: 3, py: 2, bgcolor: 'background.paper', borderBottom: '1px solid', borderColor: 'divider', position: 'sticky', top: 0, zIndex: 40, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Box>
-          <Typography variant="h4" sx={{ fontSize: '1.35rem' }}>Good morning, Alex 👋</Typography>
-          <Typography variant="caption" sx={{ color: 'text.secondary' }}>Friday, April 3 · Week 14 of your journey</Typography>
+          <Typography variant="h4" sx={{ fontSize: '1.35rem' }}>{t('greeting')}</Typography>
+          <Typography variant="caption" sx={{ color: 'text.secondary' }}>{t('dateInfo')}</Typography>
         </Box>
-        <Button variant="outlined" color="secondary" size="small" onClick={() => router.push('/admin')}>Admin view</Button>
+        <Button variant="outlined" color="secondary" size="small" onClick={() => router.push('/admin')}>{tc('adminView')}</Button>
       </Box>
 
       <Box sx={{ p: 3 }}>
@@ -80,8 +84,8 @@ export default function Dashboard() {
           <Grid item xs={12} md={8}>
             <Card><CardContent>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-                <Typography variant="subtitle2">Weekly activity</Typography>
-                <Typography variant="caption" sx={{ color: 'primary.main' }}>This week</Typography>
+                <Typography variant="subtitle2">{t('weeklyActivity')}</Typography>
+                <Typography variant="caption" sx={{ color: 'primary.main' }}>{tc('thisWeek')}</Typography>
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'flex-end', gap: 0.75, height: 110 }}>
                 {ACTIVITY.map((h, i) => (
@@ -95,7 +99,7 @@ export default function Dashboard() {
           </Grid>
           <Grid item xs={12} md={4}>
             <Card sx={{ height: '100%' }}><CardContent>
-              <Typography variant="subtitle2" sx={{ mb: 1.5 }}>Top learners</Typography>
+              <Typography variant="subtitle2" sx={{ mb: 1.5 }}>{t('topLearners')}</Typography>
               {LEADERBOARD.map((p, i) => (
                 <Box key={p.name} sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 0.75, borderBottom: i < LEADERBOARD.length - 1 ? '1px solid' : 'none', borderColor: 'divider' }}>
                   <Typography sx={{ fontSize: '0.72rem', fontWeight: 700, color: i === 0 ? '#c8a96e' : 'text.disabled', width: 16, textAlign: 'center' }}>{i + 1}</Typography>
@@ -111,8 +115,8 @@ export default function Dashboard() {
         {/* In progress */}
         <Card sx={{ mb: 2 }}><CardContent>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1.5 }}>
-            <Typography variant="subtitle2">Continue learning</Typography>
-            <Typography variant="caption" sx={{ color: 'primary.main', cursor: 'pointer' }} onClick={() => router.push('/courses')}>See all courses</Typography>
+            <Typography variant="subtitle2">{t('continueLearning')}</Typography>
+            <Typography variant="caption" sx={{ color: 'primary.main', cursor: 'pointer' }} onClick={() => router.push('/courses')}>{tc('seeAll')}</Typography>
           </Box>
           {inProgress.map((c, i) => (
             <Box key={c.id} onClick={() => router.push(`/courses/${c.id}`)} sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 1, borderBottom: i < inProgress.length - 1 ? '1px solid' : 'none', borderColor: 'divider', cursor: 'pointer', '&:hover': { bgcolor: 'background.default', mx: -2, px: 2, borderRadius: 1 } }}>
@@ -131,10 +135,9 @@ export default function Dashboard() {
 
         {/* Bottom row */}
         <Grid container spacing={1.5}>
-          {/* Upcoming */}
           <Grid item xs={12} md={4}>
             <Card sx={{ height: '100%' }}><CardContent>
-              <Typography variant="subtitle2" sx={{ mb: 1.5 }}>Upcoming sessions</Typography>
+              <Typography variant="subtitle2" sx={{ mb: 1.5 }}>{t('upcomingSessions')}</Typography>
               {UPCOMING.map((s, i) => (
                 <Box key={s.title} sx={{ display: 'flex', gap: 1.25, py: 0.875, borderBottom: i < UPCOMING.length - 1 ? '1px solid' : 'none', borderColor: 'divider' }}>
                   <Box sx={{ bgcolor: 'primary.light', color: 'primary.dark', borderRadius: 1.5, px: 0.875, py: 0.5, textAlign: 'center', minWidth: 40, flexShrink: 0 }}>
@@ -149,11 +152,9 @@ export default function Dashboard() {
               ))}
             </CardContent></Card>
           </Grid>
-
-          {/* Announcements */}
           <Grid item xs={12} md={4}>
             <Card sx={{ height: '100%' }}><CardContent>
-              <Typography variant="subtitle2" sx={{ mb: 1.5 }}>Announcements</Typography>
+              <Typography variant="subtitle2" sx={{ mb: 1.5 }}>{t('announcements')}</Typography>
               {ANNOUNCEMENTS.map((a, i) => (
                 <Box key={a.title} sx={{ py: 0.75, borderBottom: i < ANNOUNCEMENTS.length - 1 ? '1px solid' : 'none', borderColor: 'divider' }}>
                   <Chip label={a.tag} size="small" sx={{ bgcolor: a.color, color: a.textColor, height: 18, fontSize: '0.6rem', mb: 0.5 }} />
@@ -163,11 +164,9 @@ export default function Dashboard() {
               ))}
             </CardContent></Card>
           </Grid>
-
-          {/* Certs */}
           <Grid item xs={12} md={4}>
             <Card sx={{ height: '100%' }}><CardContent>
-              <Typography variant="subtitle2" sx={{ mb: 1.5 }}>My certificates</Typography>
+              <Typography variant="subtitle2" sx={{ mb: 1.5 }}>{t('myCertificates')}</Typography>
               {CERTS.map((c, i) => (
                 <Box key={c.name} sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 0.875, borderBottom: i < CERTS.length - 1 ? '1px solid' : 'none', borderColor: 'divider' }}>
                   <Box sx={{ width: 32, height: 32, borderRadius: 1.5, bgcolor: '#e8d5a8', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>🏅</Box>
@@ -175,7 +174,7 @@ export default function Dashboard() {
                     <Typography variant="body2" sx={{ fontWeight: 500, fontSize: '0.82rem' }}>{c.name}</Typography>
                     <Typography variant="caption" sx={{ color: 'text.secondary' }}>{c.date}</Typography>
                   </Box>
-                  <Typography variant="caption" sx={{ color: 'primary.main', fontWeight: 500, cursor: 'pointer' }}>Download</Typography>
+                  <Typography variant="caption" sx={{ color: 'primary.main', fontWeight: 500, cursor: 'pointer' }}>{tc('download')}</Typography>
                 </Box>
               ))}
             </CardContent></Card>

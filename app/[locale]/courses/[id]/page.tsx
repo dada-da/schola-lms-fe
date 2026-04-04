@@ -1,6 +1,8 @@
 'use client'
 import { useState } from 'react'
-import { useRouter, useParams } from 'next/navigation'
+import { useParams } from 'next/navigation'
+import { useTranslations } from 'next-intl'
+import { useRouter } from '@/i18n/navigation'
 import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
 import Card from '@mui/material/Card'
@@ -20,12 +22,14 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked'
-import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import StarRateRoundedIcon from '@mui/icons-material/StarRateRounded'
 import DashboardLayout from '@/components/layout/DashboardLayout'
 import { COURSES } from '@/lib/data'
 
-const MODULES = [
+type Lesson = { title: string; duration: string; done?: boolean; current?: boolean }
+type Module = { title: string; done: boolean; active?: boolean; lessons: Lesson[] }
+
+const MODULES: Module[] = [
   { title: 'Foundations of UX Research', done: true, lessons: [
     { title: 'What is UX research?', duration: '12 min', done: true },
     { title: 'Research methods overview', duration: '18 min', done: true },
@@ -62,28 +66,29 @@ const RESOURCES = [
 export default function CourseDetail() {
   const router = useRouter()
   const params = useParams()
+  const t = useTranslations('courseDetail')
+  const tc = useTranslations('common')
   const [activeTab, setActiveTab] = useState(0)
-  const course = COURSES.find(c => c.id === params.id) ?? COURSES[0]
+  const course = (COURSES.find(c => c.id === params.id) ?? COURSES[0])!
 
   return (
     <DashboardLayout>
       <Box sx={{ px: 3, py: 1.75, bgcolor: 'background.paper', borderBottom: '1px solid', borderColor: 'divider', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, zIndex: 40 }}>
         <Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.25 }}>
-            <Typography variant="caption" sx={{ color: 'text.secondary', cursor: 'pointer', '&:hover': { color: 'primary.main' } }} onClick={() => router.push('/dashboard')}>Dashboard</Typography>
+            <Typography variant="caption" sx={{ color: 'text.secondary', cursor: 'pointer', '&:hover': { color: 'primary.main' } }} onClick={() => router.push('/dashboard')}>{t('dashboard')}</Typography>
             <Typography variant="caption" sx={{ color: 'text.disabled' }}>›</Typography>
-            <Typography variant="caption" sx={{ color: 'text.secondary', cursor: 'pointer', '&:hover': { color: 'primary.main' } }} onClick={() => router.push('/courses')}>Courses</Typography>
+            <Typography variant="caption" sx={{ color: 'text.secondary', cursor: 'pointer', '&:hover': { color: 'primary.main' } }} onClick={() => router.push('/courses')}>{t('courses')}</Typography>
             <Typography variant="caption" sx={{ color: 'text.disabled' }}>›</Typography>
             <Typography variant="caption">{course.title}</Typography>
           </Box>
           <Typography variant="h4" sx={{ fontSize: '1.25rem' }}>{course.title}</Typography>
         </Box>
-        <Button variant="contained" color="primary" size="small" onClick={() => router.push(`/quiz/${course.id}`)}>Take quiz</Button>
+        <Button variant="contained" color="primary" size="small" onClick={() => router.push(`/quiz/${course.id}`)}>{t('takeQuiz')}</Button>
       </Box>
 
       <Box sx={{ p: 3 }}>
         <Grid container spacing={2} alignItems="flex-start">
-          {/* Main */}
           <Grid item xs={12} md={8}>
             {/* Video player */}
             <Card sx={{ mb: 2, overflow: 'hidden' }}>
@@ -96,18 +101,18 @@ export default function CourseDetail() {
                 <Typography sx={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.78rem' }}>35 min · Module 3</Typography>
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 2, py: 1.25, bgcolor: '#111827' }}>
-                <Button size="small" sx={{ color: 'rgba(255,255,255,0.6)', borderColor: 'rgba(255,255,255,0.2)' }} variant="outlined">⟵ Prev</Button>
+                <Button size="small" sx={{ color: 'rgba(255,255,255,0.6)', borderColor: 'rgba(255,255,255,0.2)' }} variant="outlined">{t('prevLesson')}</Button>
                 <Box sx={{ flex: 1, px: 1 }}>
                   <LinearProgress variant="determinate" value={35} sx={{ height: 4, bgcolor: 'rgba(255,255,255,0.2)', '& .MuiLinearProgress-bar': { bgcolor: '#fff' } }} />
                 </Box>
                 <Typography sx={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)', whiteSpace: 'nowrap' }}>12:30 / 35:00</Typography>
-                <Button size="small" variant="contained" color="primary">Next ⟶</Button>
+                <Button size="small" variant="contained" color="primary">{t('nextLesson')}</Button>
               </Box>
             </Card>
 
             {/* Tabs */}
             <Tabs value={activeTab} onChange={(_, v) => setActiveTab(v)} sx={{ mb: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
-              {['Overview', 'Curriculum', 'Discussion', 'Resources'].map(t => <Tab key={t} label={t} />)}
+              {[t('overview'), t('curriculum'), t('discussion'), t('resources')].map(label => <Tab key={label} label={label} />)}
             </Tabs>
 
             {/* Overview */}
@@ -116,22 +121,22 @@ export default function CourseDetail() {
                 <Typography variant="h5" sx={{ mb: 1 }}>{course.title}</Typography>
                 <Typography sx={{ color: 'text.secondary', lineHeight: 1.75, mb: 2 }}>{course.description}</Typography>
                 <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap', mb: 2 }}>
-                  {course.tags.map(t => <Chip key={t} label={t} size="small" variant="outlined" />)}
+                  {course.tags.map(tag => <Chip key={tag} label={tag} size="small" variant="outlined" />)}
                 </Box>
                 <Box sx={{ display: 'flex', gap: 3, mb: 2 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                     <StarRateRoundedIcon sx={{ fontSize: 16, color: '#c8a96e' }} />
                     <Typography variant="body2" sx={{ fontWeight: 600, color: '#c8a96e' }}>{course.rating}</Typography>
-                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>({course.reviews} reviews)</Typography>
+                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>({course.reviews} {tc('reviews')})</Typography>
                   </Box>
-                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>{course.students.toLocaleString()} students</Typography>
+                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>{course.students.toLocaleString()} {tc('students')}</Typography>
                   <Chip label={course.level} size="small" sx={{ bgcolor: '#e1f2ef', color: '#1f6257' }} />
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, bgcolor: 'background.default', borderRadius: 2, p: 1.5 }}>
                   <Avatar sx={{ bgcolor: course.instructorColor, fontWeight: 600, fontSize: '0.82rem' }}>{course.instructorInitials}</Avatar>
                   <Box>
                     <Typography variant="subtitle2">{course.instructor}</Typography>
-                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>Principal UX Researcher · Google · Author of "Research That Ships"</Typography>
+                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>Principal UX Researcher · Google · Author of &ldquo;Research That Ships&rdquo;</Typography>
                   </Box>
                 </Box>
               </CardContent></Card>
@@ -143,8 +148,8 @@ export default function CourseDetail() {
                 {MODULES.map((mod, mi) => (
                   <Accordion key={mi} defaultExpanded={mi < 2} disableGutters sx={{ mb: 0.75, border: '1px solid', borderColor: 'divider', '&:before': { display: 'none' }, borderRadius: '8px !important', overflow: 'hidden' }}>
                     <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ bgcolor: mod.active ? 'primary.light' : 'background.paper' }}>
-                      <Typography variant="subtitle2">Module {mi + 1}: {mod.title}</Typography>
-                      <Typography variant="caption" sx={{ color: 'text.secondary', ml: 'auto', mr: 2 }}>{mod.lessons.length} lessons</Typography>
+                      <Typography variant="subtitle2">{t('module', { num: mi + 1 })}: {mod.title}</Typography>
+                      <Typography variant="caption" sx={{ color: 'text.secondary', ml: 'auto', mr: 2 }}>{mod.lessons.length} {tc('lessons')}</Typography>
                     </AccordionSummary>
                     <AccordionDetails sx={{ p: 0 }}>
                       {mod.lessons.map((l, li) => (
@@ -174,14 +179,14 @@ export default function CourseDetail() {
                       <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.65, mb: 0.75 }}>{d.text}</Typography>
                       <Box sx={{ display: 'flex', gap: 1.5 }}>
                         <Typography variant="caption" sx={{ color: 'text.secondary', cursor: 'pointer', '&:hover': { color: 'primary.main' } }}>👍 {d.likes}</Typography>
-                        <Typography variant="caption" sx={{ color: 'text.secondary', cursor: 'pointer', '&:hover': { color: 'primary.main' } }}>Reply</Typography>
+                        <Typography variant="caption" sx={{ color: 'text.secondary', cursor: 'pointer', '&:hover': { color: 'primary.main' } }}>{tc('reply')}</Typography>
                       </Box>
                     </Box>
                   </Box>
                 ))}
                 <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid', borderColor: 'divider' }}>
-                  <TextField multiline rows={3} fullWidth placeholder="Add a comment…" size="small" sx={{ mb: 1 }} />
-                  <Button variant="contained" color="primary" size="small">Post comment</Button>
+                  <TextField multiline rows={3} fullWidth placeholder={t('addComment')} size="small" sx={{ mb: 1 }} />
+                  <Button variant="contained" color="primary" size="small">{tc('postComment')}</Button>
                 </Box>
               </CardContent></Card>
             )}
@@ -196,7 +201,7 @@ export default function CourseDetail() {
                       <Typography variant="body2" sx={{ fontWeight: 500 }}>{r.name}</Typography>
                       <Typography variant="caption" sx={{ color: 'text.secondary' }}>{r.type} · {r.size}</Typography>
                     </Box>
-                    <Button variant="outlined" color="secondary" size="small">↓ Download</Button>
+                    <Button variant="outlined" color="secondary" size="small">↓ {tc('download')}</Button>
                   </Box>
                 ))}
               </CardContent></Card>
@@ -206,14 +211,14 @@ export default function CourseDetail() {
           {/* Sidebar */}
           <Grid item xs={12} md={4}>
             <Card sx={{ mb: 2 }}><CardContent>
-              <Typography variant="subtitle2" sx={{ mb: 1.5 }}>Your progress</Typography>
+              <Typography variant="subtitle2" sx={{ mb: 1.5 }}>{t('yourProgress')}</Typography>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-                <Typography variant="caption" sx={{ color: 'text.secondary' }}>Overall completion</Typography>
+                <Typography variant="caption" sx={{ color: 'text.secondary' }}>{t('overallCompletion')}</Typography>
                 <Typography variant="caption" sx={{ fontWeight: 600 }}>{course.progress}%</Typography>
               </Box>
               <LinearProgress variant="determinate" value={course.progress} sx={{ mb: 2 }} color="primary" />
               <Grid container spacing={1} sx={{ mb: 2 }}>
-                {[{ n: course.progress > 0 ? Math.round(course.totalModules * course.progress / 100) : 0, l: 'Lessons done' }, { n: course.lessons, l: 'Total' }, { n: `${Math.round(course.hours * (1 - course.progress / 100) * 10) / 10}h`, l: 'Remaining' }].map(s => (
+                {[{ n: course.progress > 0 ? Math.round(course.totalModules * course.progress / 100) : 0, l: t('lessonsDone') }, { n: course.lessons, l: t('total') }, { n: `${Math.round(course.hours * (1 - course.progress / 100) * 10) / 10}h`, l: t('remaining') }].map(s => (
                   <Grid item xs={4} key={s.l}>
                     <Box sx={{ bgcolor: 'background.default', borderRadius: 1.5, p: 1, textAlign: 'center' }}>
                       <Typography sx={{ fontFamily: '"DM Serif Display",serif', fontSize: '1.25rem' }}>{s.n}</Typography>
@@ -222,17 +227,17 @@ export default function CourseDetail() {
                   </Grid>
                 ))}
               </Grid>
-              <Button fullWidth variant="contained" color="primary" onClick={() => router.push(`/quiz/${course.id}`)}>Take module quiz</Button>
+              <Button fullWidth variant="contained" color="primary" onClick={() => router.push(`/quiz/${course.id}`)}>{t('takeModuleQuiz')}</Button>
             </CardContent></Card>
 
             <Card><CardContent>
-              <Typography variant="subtitle2" sx={{ mb: 1.5 }}>Course modules</Typography>
+              <Typography variant="subtitle2" sx={{ mb: 1.5 }}>{t('courseModules')}</Typography>
               {MODULES.map((mod, mi) => (
                 <Box key={mi} sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 0.75, borderBottom: mi < MODULES.length - 1 ? '1px solid' : 'none', borderColor: 'divider' }}>
                   <Box sx={{ width: 10, height: 10, borderRadius: '50%', flexShrink: 0, bgcolor: mod.done ? 'primary.main' : mod.active ? 'transparent' : 'divider', border: mod.active ? '2px solid' : 'none', borderColor: mod.active ? 'primary.main' : 'transparent', boxShadow: mod.active ? '0 0 0 3px #e1f2ef' : 'none' }} />
                   <Box sx={{ flex: 1 }}>
                     <Typography variant="body2" sx={{ fontSize: '0.82rem', fontWeight: mod.active ? 600 : 400, color: mod.active ? 'primary.dark' : 'text.primary' }}>{mod.title}</Typography>
-                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>{mod.lessons.length} lessons</Typography>
+                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>{mod.lessons.length} {tc('lessons')}</Typography>
                   </Box>
                   {mod.done && <Typography sx={{ fontSize: '0.78rem', color: 'primary.main' }}>✓</Typography>}
                 </Box>

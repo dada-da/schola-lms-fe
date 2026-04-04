@@ -4,10 +4,6 @@ import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
 
-/**
- * error.tsx — Rendered by Next.js when an unhandled error occurs
- * in a page or layout. Must be a Client Component.
- */
 export default function GlobalError({
   error,
   reset,
@@ -16,7 +12,6 @@ export default function GlobalError({
   reset: () => void
 }) {
   useEffect(() => {
-    // Log to your error tracking service (Sentry, Datadog, etc.)
     console.error('[GlobalError]', error)
   }, [error])
 
@@ -34,14 +29,12 @@ export default function GlobalError({
       }}
     >
       <Typography sx={{ fontSize: '3.5rem', mb: 2, lineHeight: 1 }}>⚠️</Typography>
-
       <Typography
         variant="h4"
         sx={{ fontFamily: '"DM Serif Display", Georgia, serif', mb: 1.5 }}
       >
         Something went wrong
       </Typography>
-
       <Typography
         variant="body1"
         sx={{ color: '#4a4a6a', maxWidth: 360, lineHeight: 1.75, mb: 4 }}
@@ -49,8 +42,6 @@ export default function GlobalError({
         An unexpected error occurred. Our team has been notified. Try refreshing
         the page, or head back to the dashboard.
       </Typography>
-
-      {/* Show digest in dev for easier debugging */}
       {process.env.NODE_ENV === 'development' && error.digest && (
         <Typography
           variant="caption"
@@ -68,7 +59,6 @@ export default function GlobalError({
           digest: {error.digest}
         </Typography>
       )}
-
       <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', justifyContent: 'center' }}>
         <Button variant="contained" color="primary" size="large" onClick={reset}>
           Try again

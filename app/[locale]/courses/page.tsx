@@ -1,11 +1,11 @@
 'use client'
 import { useState, useMemo } from 'react'
+import { useTranslations } from 'next-intl'
+import { useRouter } from '@/i18n/navigation'
 import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
 import Typography from '@mui/material/Typography'
 import TextField from '@mui/material/TextField'
-import ToggleButton from '@mui/material/ToggleButton'
-import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
 import Select from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'
 import FormControl from '@mui/material/FormControl'
@@ -20,7 +20,10 @@ import CourseCard from '@/components/ui/CourseCard'
 import { COURSES, CATEGORIES, LEVELS } from '@/lib/data'
 
 export default function CoursesPage() {
-  const [tab, setTab] = useState(0)          // 0=All, 1=My courses
+  const t = useTranslations('courses')
+  const tc = useTranslations('common')
+  const router = useRouter()
+  const [tab, setTab] = useState(0)
   const [category, setCategory] = useState('All')
   const [level, setLevel] = useState('All levels')
   const [search, setSearch] = useState('')
@@ -45,27 +48,27 @@ export default function CoursesPage() {
     <DashboardLayout>
       {/* Header */}
       <Box sx={{ px: 3, py: 2, bgcolor: 'background.paper', borderBottom: '1px solid', borderColor: 'divider', position: 'sticky', top: 0, zIndex: 40 }}>
-        <Typography variant="h4" sx={{ fontSize: '1.35rem' }}>Courses</Typography>
+        <Typography variant="h4" sx={{ fontSize: '1.35rem' }}>{t('title')}</Typography>
         <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-          {COURSES.length} courses available · {COURSES.filter(c => c.progress > 0).length} enrolled
+          {t('coursesAvailable', { count: COURSES.length, enrolled: COURSES.filter(c => c.progress > 0).length })}
         </Typography>
       </Box>
 
       <Box sx={{ p: 3 }}>
-        {/* Tabs: All / My Courses */}
+        {/* Tabs */}
         <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 3, borderBottom: '1px solid', borderColor: 'divider' }}>
-          <Tab label="All courses" />
-          <Tab label={`My courses (${COURSES.filter(c => c.progress > 0).length})`} />
+          <Tab label={t('allCourses')} />
+          <Tab label={t('myCourses', { count: COURSES.filter(c => c.progress > 0).length })} />
         </Tabs>
 
-        {/* My courses summary (when tab=1) */}
+        {/* My courses summary */}
         {tab === 1 && (
           <Grid container spacing={1.5} sx={{ mb: 3 }}>
             {[
-              { label: 'In progress', value: myInProgress.length, color: '#e1f2ef', text: '#1f6257' },
-              { label: 'Completed', value: myCompleted.length, color: '#e8d5a8', text: '#6b4a0e' },
-              { label: 'Total hours studied', value: '42.5h', color: '#e8f0fa', text: '#1d4f7a' },
-              { label: 'Avg. completion', value: `${Math.round(COURSES.filter(c => c.progress > 0).reduce((a, b) => a + b.progress, 0) / COURSES.filter(c => c.progress > 0).length)}%`, color: '#faeaec', text: '#8a3040' },
+              { label: t('inProgress'), value: myInProgress.length, color: '#e1f2ef', text: '#1f6257' },
+              { label: t('completed'), value: myCompleted.length, color: '#e8d5a8', text: '#6b4a0e' },
+              { label: t('totalHoursStudied'), value: '42.5h', color: '#e8f0fa', text: '#1d4f7a' },
+              { label: t('avgCompletion'), value: `${Math.round(COURSES.filter(c => c.progress > 0).reduce((a, b) => a + b.progress, 0) / COURSES.filter(c => c.progress > 0).length)}%`, color: '#faeaec', text: '#8a3040' },
             ].map(s => (
               <Grid item xs={6} md={3} key={s.label}>
                 <Box sx={{ bgcolor: s.color, borderRadius: 2, px: 2, py: 1.5 }}>
@@ -77,10 +80,10 @@ export default function CoursesPage() {
           </Grid>
         )}
 
-        {/* Filters row */}
+        {/* Filters */}
         <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', alignItems: 'center', mb: 3 }}>
           <TextField
-            placeholder="Search courses or topics…"
+            placeholder={t('searchPlaceholder')}
             size="small"
             value={search}
             onChange={e => setSearch(e.target.value)}
@@ -89,7 +92,6 @@ export default function CoursesPage() {
             }}
             sx={{ flex: '1 1 220px', maxWidth: 320 }}
           />
-
           <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap' }}>
             {CATEGORIES.map(cat => (
               <Chip
@@ -103,18 +105,21 @@ export default function CoursesPage() {
               />
             ))}
           </Box>
-
           <FormControl size="small" sx={{ minWidth: 130, ml: 'auto' }}>
-            <InputLabel>Level</InputLabel>
-            <Select value={level} label="Level" onChange={e => setLevel(e.target.value)}>
+            <InputLabel>{t('level')}</InputLabel>
+            <Select value={level} label={t('level')} onChange={e => setLevel(e.target.value)}>
               {LEVELS.map(l => <MenuItem key={l} value={l}>{l}</MenuItem>)}
             </Select>
           </FormControl>
-
           <FormControl size="small" sx={{ minWidth: 130 }}>
-            <InputLabel>Sort by</InputLabel>
-            <Select value={sort} label="Sort by" onChange={e => setSort(e.target.value)}>
-              {['Popular', 'Rating', 'Newest', 'Price: Low'].map(s => <MenuItem key={s} value={s}>{s}</MenuItem>)}
+            <InputLabel>{t('sortBy')}</InputLabel>
+            <Select value={sort} label={t('sortBy')} onChange={e => setSort(e.target.value)}>
+              {[
+                { value: 'Popular', label: t('sortPopular') },
+                { value: 'Rating', label: t('sortRating') },
+                { value: 'Newest', label: t('sortNewest') },
+                { value: 'Price: Low', label: t('sortPriceLow') },
+              ].map(s => <MenuItem key={s.value} value={s.value}>{s.label}</MenuItem>)}
             </Select>
           </FormControl>
         </Box>
@@ -122,9 +127,12 @@ export default function CoursesPage() {
         {/* Results count */}
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
           <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-            {filtered.length} course{filtered.length !== 1 ? 's' : ''} found
-            {search && ` for "${search}"`}
-            {category !== 'All' && ` in ${category}`}
+            {search
+              ? t('coursesFoundFor', { count: filtered.length, search })
+              : category !== 'All'
+                ? t('coursesFoundIn', { count: filtered.length, category })
+                : t('coursesFound', { count: filtered.length })
+            }
           </Typography>
           {(search || category !== 'All' || level !== 'All levels') && (
             <Typography
@@ -132,15 +140,15 @@ export default function CoursesPage() {
               sx={{ color: 'primary.main', cursor: 'pointer', fontWeight: 500 }}
               onClick={() => { setSearch(''); setCategory('All'); setLevel('All levels') }}
             >
-              Clear filters
+              {tc('clearFilters')}
             </Typography>
           )}
         </Box>
 
-        {/* In progress section (my courses tab) */}
+        {/* In progress section */}
         {tab === 1 && myInProgress.length > 0 && (
           <>
-            <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1.5, mt: 1 }}>Continue learning</Typography>
+            <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1.5, mt: 1 }}>{t('continueLearning')}</Typography>
             <Grid container spacing={1.5} sx={{ mb: 3 }}>
               {myInProgress.map(c => (
                 <Grid item xs={12} sm={6} md={4} lg={3} key={c.id}>
@@ -149,7 +157,7 @@ export default function CoursesPage() {
               ))}
             </Grid>
             {myCompleted.length > 0 && (
-              <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1.5, mt: 1 }}>Completed</Typography>
+              <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1.5, mt: 1 }}>{t('completed')}</Typography>
             )}
           </>
         )}
@@ -158,8 +166,8 @@ export default function CoursesPage() {
         {filtered.length === 0 ? (
           <Box sx={{ textAlign: 'center', py: 8 }}>
             <Typography sx={{ fontSize: '2rem', mb: 1 }}>🔍</Typography>
-            <Typography variant="h6">No courses found</Typography>
-            <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.5 }}>Try adjusting your search or filters</Typography>
+            <Typography variant="h6">{t('noCoursesFound')}</Typography>
+            <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.5 }}>{t('noCoursesHint')}</Typography>
           </Box>
         ) : (
           <Grid container spacing={1.5}>

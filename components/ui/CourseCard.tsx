@@ -1,5 +1,6 @@
 'use client'
-import { useRouter } from 'next/navigation'
+import { useRouter } from '@/i18n/navigation'
+import { useTranslations } from 'next-intl'
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
 import Box from '@mui/material/Box'
@@ -20,6 +21,7 @@ const CAT_COLORS: Record<string, { bg: string; color: string }> = {
 
 export default function CourseCard({ course, showProgress = false }: { course: Course; showProgress?: boolean }) {
   const router = useRouter()
+  const t = useTranslations('courseCard')
   const catStyle = CAT_COLORS[course.category] ?? { bg: '#f0ede6', color: '#4a4a6a' }
 
   return (
@@ -79,7 +81,7 @@ export default function CourseCard({ course, showProgress = false }: { course: C
             <Typography variant="caption" sx={{ color: 'text.disabled' }}>{course.hours}h</Typography>
           </Box>
           {course.price === 0
-            ? <Chip label="Free" size="small" sx={{ ml: 'auto', bgcolor: '#e1f2ef', color: '#1f6257', height: 18, fontSize: '0.6rem' }} />
+            ? <Chip label={t('free')} size="small" sx={{ ml: 'auto', bgcolor: '#e1f2ef', color: '#1f6257', height: 18, fontSize: '0.6rem' }} />
             : <Typography variant="caption" sx={{ ml: 'auto', fontWeight: 600, color: 'secondary.main' }}>${course.price}</Typography>
           }
         </Box>
@@ -88,14 +90,14 @@ export default function CourseCard({ course, showProgress = false }: { course: C
         {showProgress && course.progress > 0 && (
           <Box sx={{ mt: 1 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-              <Typography variant="caption" sx={{ color: 'text.secondary' }}>Progress</Typography>
+              <Typography variant="caption" sx={{ color: 'text.secondary' }}>{t('progress')}</Typography>
               <Typography variant="caption" sx={{ fontWeight: 600 }}>{course.progress}%</Typography>
             </Box>
             <LinearProgress variant="determinate" value={course.progress} color="primary" />
           </Box>
         )}
         {showProgress && course.progress === 100 && (
-          <Chip label="Completed ✓" size="small" color="success" sx={{ mt: 1, alignSelf: 'flex-start', height: 20, fontSize: '0.62rem' }} />
+          <Chip label={t('completed')} size="small" color="success" sx={{ mt: 1, alignSelf: 'flex-start', height: 20, fontSize: '0.62rem' }} />
         )}
       </CardContent>
     </Card>
