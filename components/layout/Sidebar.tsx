@@ -10,6 +10,7 @@ import ListItemText from '@mui/material/ListItemText'
 import Typography from '@mui/material/Typography'
 import Divider from '@mui/material/Divider'
 import Avatar from '@mui/material/Avatar'
+import IconButton from '@mui/material/IconButton'
 import DashboardOutlinedIcon from '@mui/icons-material/DashboardOutlined'
 import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined'
 import CalendarTodayOutlinedIcon from '@mui/icons-material/CalendarTodayOutlined'
@@ -21,7 +22,9 @@ import GroupsOutlinedIcon from '@mui/icons-material/GroupsOutlined'
 import ChatBubbleOutlineOutlinedIcon from '@mui/icons-material/ChatBubbleOutlineOutlined'
 import AdminPanelSettingsOutlinedIcon from '@mui/icons-material/AdminPanelSettingsOutlined'
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined'
+import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined'
 import LanguageSwitcher from '@/components/ui/LanguageSwitcher'
+import { useAuth } from '@/contexts/auth-context'
 
 const DRAWER_WIDTH = 224
 
@@ -39,6 +42,15 @@ export default function Sidebar({
   const pathname = usePathname()
   const router = useRouter()
   const t = useTranslations('sidebar')
+  const { user, logout } = useAuth()
+
+  const userInitials = user?.email.slice(0, 2).toUpperCase() ?? '??'
+  const userLabel = user?.email ?? ''
+
+  async function handleLogout() {
+    await logout()
+    router.push('/login')
+  }
 
   const NAV: NavEntry[] = [
     { section: t('main') },
@@ -150,11 +162,25 @@ export default function Sidebar({
           <LanguageSwitcher />
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, px: 1.5, pt: 1.5, mt: 0.5, borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-          <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.main', fontSize: '0.72rem', fontWeight: 600 }}>AM</Avatar>
-          <Box>
-            <Typography sx={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.85)', fontWeight: 500, lineHeight: 1.2 }}>Alex Minh</Typography>
-            <Typography sx={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.35)', lineHeight: 1.2 }}>{t('proLearner')}</Typography>
+          <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.main', fontSize: '0.72rem', fontWeight: 600 }}>
+            {userInitials}
+          </Avatar>
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Typography sx={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.85)', fontWeight: 500, lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {userLabel}
+            </Typography>
+            <Typography sx={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.35)', lineHeight: 1.2 }}>
+              {user?.role?.toLowerCase() ?? '—'}
+            </Typography>
           </Box>
+          <IconButton
+            onClick={handleLogout}
+            size="small"
+            title="Sign out"
+            sx={{ color: 'rgba(255,255,255,0.35)', '&:hover': { color: 'rgba(255,255,255,0.85)' } }}
+          >
+            <LogoutOutlinedIcon fontSize="small" />
+          </IconButton>
         </Box>
       </Box>
     </Box>

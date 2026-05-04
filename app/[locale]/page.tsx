@@ -17,12 +17,24 @@ import List from '@mui/material/List'
 import ListItemButton from '@mui/material/ListItemButton'
 import ListItemText from '@mui/material/ListItemText'
 import Divider from '@mui/material/Divider'
+import CircularProgress from '@mui/material/CircularProgress'
 import StarRateRoundedIcon from '@mui/icons-material/StarRateRounded'
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 import MenuIcon from '@mui/icons-material/Menu'
 import CloseIcon from '@mui/icons-material/Close'
+import PeopleOutlineIcon from '@mui/icons-material/PeopleOutline'
+import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined'
+import BarChartOutlinedIcon from '@mui/icons-material/BarChartOutlined'
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
+import AdminPanelSettingsOutlinedIcon from '@mui/icons-material/AdminPanelSettingsOutlined'
+import HealthAndSafetyOutlinedIcon from '@mui/icons-material/HealthAndSafetyOutlined'
 import LanguageSwitcher from '@/components/ui/LanguageSwitcher'
+import DashboardLayout from '@/components/layout/DashboardLayout'
+import { useAuth } from '@/contexts/auth-context'
+import type { AuthUser } from '@/contexts/auth-context'
 import { COURSES } from '@/lib/data'
+
+// ─── Constants ─────────────────────────────────────────────────────────────
 
 const FEATURE_KEYS = [
   { key: 'adaptiveLearning', icon: '🎯', bg: '#e1f2ef' },
@@ -40,11 +52,39 @@ const STAT_KEYS = [
   { num: '8,200+', key: 'certificatesIssued' },
 ] as const
 
+const TEACHER_COURSES = COURSES.slice(0, 4).map((c, i) => ({
+  ...c,
+  studentsCount: [48, 132, 67, 91][i],
+}))
+
+// ─── Root ──────────────────────────────────────────────────────────────────
+
 export default function Home() {
+  const { user, loading } = useAuth()
+
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
+        <CircularProgress />
+      </Box>
+    )
+  }
+
+  if (!user) return <GuestView />
+
+  const role = user.role.toUpperCase()
+  if (role === 'ADMIN') return <AdminView user={user} />
+  if (role === 'TEACHER') return <TeacherView user={user} />
+  return <StudentView user={user} />
+}
+
+// ─── Guest landing ─────────────────────────────────────────────────────────
+
+function GuestView() {
   const router = useRouter()
   const t = useTranslations('landing')
   const tc = useTranslations('common')
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [mobileOpen, setMobileOpen] = useState(false)
 
   const PLANS = [
     { nameKey: 'starter', featured: false },
@@ -59,7 +99,6 @@ export default function Home() {
         <Typography sx={{ fontFamily: '"DM Serif Display",serif', fontSize: '1.4rem', color: 'secondary.main' }}>
           Schola<Box component="span" sx={{ color: 'primary.main' }}>LMS</Box>
         </Typography>
-        {/* Desktop nav */}
         <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 2, alignItems: 'center' }}>
           {[
             { label: tc('features'), href: '#features' },
@@ -69,19 +108,18 @@ export default function Home() {
             <Typography key={l.href} component="a" href={l.href} sx={{ fontSize: '0.875rem', color: 'text.secondary', textDecoration: 'none', '&:hover': { color: 'primary.main' } }}>{l.label}</Typography>
           ))}
           <LanguageSwitcher />
-          <Button variant="outlined" size="small" color="secondary" onClick={() => router.push('/dashboard')}>{tc('signIn')}</Button>
-          <Button variant="contained" size="small" color="primary" onClick={() => router.push('/dashboard')}>{tc('startFree')}</Button>
+          <Button variant="outlined" size="small" color="secondary" onClick={() => router.push('/login')}>{tc('signIn')}</Button>
+          <Button variant="contained" size="small" color="primary" onClick={() => router.push('/login')}>{tc('startFree')}</Button>
         </Box>
-        {/* Mobile hamburger */}
-        <IconButton sx={{ display: { xs: 'flex', md: 'none' } }} onClick={() => setMobileMenuOpen(true)}>
+        <IconButton sx={{ display: { xs: 'flex', md: 'none' } }} onClick={() => setMobileOpen(true)}>
           <MenuIcon />
         </IconButton>
-        <Drawer anchor="right" open={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} sx={{ display: { xs: 'block', md: 'none' }, '& .MuiDrawer-paper': { width: 260 } }}>
+        <Drawer anchor="right" open={mobileOpen} onClose={() => setMobileOpen(false)} sx={{ display: { xs: 'block', md: 'none' }, '& .MuiDrawer-paper': { width: 260 } }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', px: 2, py: 1.5 }}>
             <Typography sx={{ fontFamily: '"DM Serif Display",serif', fontSize: '1.2rem', color: 'secondary.main' }}>
               Schola<Box component="span" sx={{ color: 'primary.main' }}>LMS</Box>
             </Typography>
-            <IconButton onClick={() => setMobileMenuOpen(false)}><CloseIcon /></IconButton>
+            <IconButton onClick={() => setMobileOpen(false)}><CloseIcon /></IconButton>
           </Box>
           <Divider />
           <List>
@@ -90,7 +128,7 @@ export default function Home() {
               { label: tc('courses'), href: '#courses' },
               { label: tc('pricing'), href: '#pricing' },
             ].map(l => (
-              <ListItemButton key={l.href} component="a" href={l.href} onClick={() => setMobileMenuOpen(false)}>
+              <ListItemButton key={l.href} component="a" href={l.href} onClick={() => setMobileOpen(false)}>
                 <ListItemText primary={l.label} />
               </ListItemButton>
             ))}
@@ -98,8 +136,8 @@ export default function Home() {
           <Divider />
           <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
             <LanguageSwitcher />
-            <Button fullWidth variant="outlined" color="secondary" onClick={() => { router.push('/dashboard'); setMobileMenuOpen(false) }}>{tc('signIn')}</Button>
-            <Button fullWidth variant="contained" color="primary" onClick={() => { router.push('/dashboard'); setMobileMenuOpen(false) }}>{tc('startFree')}</Button>
+            <Button fullWidth variant="outlined" color="secondary" onClick={() => { router.push('/login'); setMobileOpen(false) }}>{tc('signIn')}</Button>
+            <Button fullWidth variant="contained" color="primary" onClick={() => { router.push('/login'); setMobileOpen(false) }}>{tc('startFree')}</Button>
           </Box>
         </Drawer>
       </Box>
@@ -116,10 +154,10 @@ export default function Home() {
               {t('heroDesc')}
             </Typography>
             <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
-              <Button variant="contained" size="large" color="primary" endIcon={<ArrowForwardIcon />} onClick={() => router.push('/dashboard')}>
+              <Button variant="contained" size="large" color="primary" endIcon={<ArrowForwardIcon />} onClick={() => router.push('/login')}>
                 {t('startLearningFree')}
               </Button>
-              <Button variant="outlined" size="large" color="secondary" onClick={() => router.push('/courses')}>
+              <Button variant="outlined" size="large" color="secondary" onClick={() => router.push('/login')}>
                 {t('browseCourses')}
               </Button>
             </Box>
@@ -192,7 +230,7 @@ export default function Home() {
           <Grid container spacing={2}>
             {COURSES.slice(0, 3).map(c => (
               <Grid item xs={12} sm={6} md={4} key={c.id}>
-                <Card onClick={() => router.push(`/courses/${c.id}`)} sx={{ cursor: 'pointer', height: '100%', transition: 'transform 0.18s', '&:hover': { transform: 'translateY(-3px)', boxShadow: 3 } }}>
+                <Card onClick={() => router.push('/login')} sx={{ cursor: 'pointer', height: '100%', transition: 'transform 0.18s', '&:hover': { transform: 'translateY(-3px)', boxShadow: 3 } }}>
                   <Box sx={{ height: 120, bgcolor: c.thumbBg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.5rem' }}>{c.emoji}</Box>
                   <CardContent>
                     <Typography variant="overline" sx={{ color: 'primary.main' }}>{c.category}</Typography>
@@ -210,7 +248,7 @@ export default function Home() {
             ))}
           </Grid>
           <Box sx={{ textAlign: 'center', mt: 4 }}>
-            <Button variant="outlined" color="secondary" size="large" endIcon={<ArrowForwardIcon />} onClick={() => router.push('/courses')}>
+            <Button variant="outlined" color="secondary" size="large" endIcon={<ArrowForwardIcon />} onClick={() => router.push('/login')}>
               {t('browseAllCourses')}
             </Button>
           </Box>
@@ -258,7 +296,7 @@ export default function Home() {
                         fullWidth variant={p.featured ? 'contained' : 'outlined'}
                         color={p.featured ? 'primary' : 'secondary'}
                         sx={{ mt: 3, borderRadius: 100 }}
-                        onClick={() => router.push('/dashboard')}
+                        onClick={() => router.push('/login')}
                       >{t(`plans.${p.nameKey}Cta`)}</Button>
                     </CardContent>
                   </Card>
@@ -277,5 +315,297 @@ export default function Home() {
         <Typography variant="caption" sx={{ color: 'text.disabled' }}>{t('footer')}</Typography>
       </Box>
     </Box>
+  )
+}
+
+// ─── Shared header used by all logged-in views ─────────────────────────────
+
+function RoleHeader({ user, subtitle }: { user: AuthUser; subtitle: string }) {
+  const ROLE_COLORS: Record<string, { bg: string; color: string }> = {
+    ADMIN:   { bg: '#faeaec', color: '#8a3040' },
+    TEACHER: { bg: '#e8f0fa', color: '#1d4f7a' },
+    STUDENT: { bg: '#e1f2ef', color: '#1f6257' },
+  }
+  const chip = ROLE_COLORS[user.role.toUpperCase()] ?? ROLE_COLORS.STUDENT
+
+  return (
+    <Box sx={{ px: { xs: 2, md: 3 }, py: 2.5, bgcolor: 'background.paper', borderBottom: '1px solid', borderColor: 'divider', position: 'sticky', top: 0, zIndex: 40 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 0.25 }}>
+        <Typography variant="h5" sx={{ fontWeight: 600, fontSize: { xs: '1.1rem', md: '1.3rem' } }}>
+          Welcome back, <Box component="span" sx={{ color: 'primary.main' }}>{user.email}</Box>
+        </Typography>
+        <Chip
+          label={user.role}
+          size="small"
+          sx={{ bgcolor: chip.bg, color: chip.color, fontWeight: 700, fontSize: '0.65rem', height: 20 }}
+        />
+      </Box>
+      <Typography variant="caption" color="text.secondary">{subtitle}</Typography>
+    </Box>
+  )
+}
+
+// ─── Student view ──────────────────────────────────────────────────────────
+
+function StudentView({ user }: { user: AuthUser }) {
+  const router = useRouter()
+  const t = useTranslations('home.student')
+
+  const inProgress = COURSES.filter((c: any) => c.progress > 0 && c.progress < 100)
+
+  const METRICS = [
+    { label: t('hoursThisWeek'), value: '14.5h', icon: '⏱' },
+    { label: t('coursesInProgress'), value: '4', icon: '📚' },
+    { label: t('avgScore'), value: '87%', icon: '🎯' },
+    { label: t('dayStreak'), value: '23 🔥', icon: '🔥' },
+  ]
+
+  return (
+    <DashboardLayout>
+      <RoleHeader user={user} subtitle={t('subtitle')} />
+      <Box sx={{ p: { xs: 2, md: 3 } }}>
+        {/* Stats */}
+        <Grid container spacing={1.5} sx={{ mb: 2.5 }}>
+          {METRICS.map(m => (
+            <Grid item xs={6} md={3} key={m.label}>
+              <Card>
+                <CardContent sx={{ p: 1.75, '&:last-child': { pb: 1.75 } }}>
+                  <Typography variant="overline" sx={{ color: 'text.disabled', display: 'block', mb: 0.5 }}>{m.label}</Typography>
+                  <Typography sx={{ fontFamily: '"DM Serif Display",serif', fontSize: '2rem', lineHeight: 1.1 }}>{m.value}</Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+
+        {/* Continue learning */}
+        <Card sx={{ mb: 2 }}>
+          <CardContent>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
+              <Typography variant="subtitle2">{t('continueLearning')}</Typography>
+              <Typography variant="caption" sx={{ color: 'primary.main', cursor: 'pointer' }} onClick={() => router.push('/courses')}>
+                {t('seeAll')} →
+              </Typography>
+            </Box>
+            {inProgress.slice(0, 4).map((c: any, i: number) => (
+              <Box
+                key={c.id}
+                onClick={() => router.push(`/courses/${c.id}`)}
+                sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 1, borderBottom: i < Math.min(inProgress.length, 4) - 1 ? '1px solid' : 'none', borderColor: 'divider', cursor: 'pointer', '&:hover': { bgcolor: 'background.default', mx: -2, px: 2, borderRadius: 1 } }}
+              >
+                <Box sx={{ width: 36, height: 36, borderRadius: 1.5, bgcolor: c.thumbBg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem', flexShrink: 0 }}>{c.emoji}</Box>
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                  <Typography variant="body2" sx={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.title}</Typography>
+                  <Typography variant="caption" color="text.secondary">{c.instructor}</Typography>
+                </Box>
+                <Box sx={{ textAlign: 'right', flexShrink: 0, minWidth: 72 }}>
+                  <Typography variant="caption" sx={{ fontWeight: 600 }}>{c.progress}%</Typography>
+                  <LinearProgress variant="determinate" value={c.progress} sx={{ width: 64, mt: 0.5 }} color="primary" />
+                </Box>
+              </Box>
+            ))}
+          </CardContent>
+        </Card>
+
+        {/* Explore new courses */}
+        <Box sx={{ mb: 1.5, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Typography variant="subtitle2">{t('exploreCourses')}</Typography>
+          <Typography variant="caption" sx={{ color: 'primary.main', cursor: 'pointer' }} onClick={() => router.push('/courses')}>{t('seeAll')} →</Typography>
+        </Box>
+        <Grid container spacing={1.5} sx={{ mb: 3 }}>
+          {COURSES.slice(4, 7).map(c => (
+            <Grid item xs={12} sm={4} key={c.id}>
+              <Card onClick={() => router.push(`/courses/${c.id}`)} sx={{ cursor: 'pointer', '&:hover': { boxShadow: 3 } }}>
+                <Box sx={{ height: 80, bgcolor: c.thumbBg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem' }}>{c.emoji}</Box>
+                <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
+                  <Typography variant="overline" sx={{ color: 'primary.main', fontSize: '0.6rem' }}>{c.category}</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600, lineHeight: 1.3, mb: 0.5 }}>{c.title}</Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25 }}>
+                    <StarRateRoundedIcon sx={{ fontSize: 12, color: '#c8a96e' }} />
+                    <Typography variant="caption" sx={{ fontWeight: 600, color: '#c8a96e' }}>{c.rating}</Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ ml: 0.5 }}>{c.lessons} lessons</Typography>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+
+        <Box sx={{ display: 'flex', gap: 1.5 }}>
+          <Button variant="contained" endIcon={<ArrowForwardIcon />} onClick={() => router.push('/dashboard')}>
+            {t('goToDashboard')}
+          </Button>
+          <Button variant="outlined" color="secondary" onClick={() => router.push('/courses')}>
+            {t('exploreCourses')}
+          </Button>
+        </Box>
+      </Box>
+    </DashboardLayout>
+  )
+}
+
+// ─── Teacher view ──────────────────────────────────────────────────────────
+
+function TeacherView({ user }: { user: AuthUser }) {
+  const router = useRouter()
+  const t = useTranslations('home.teacher')
+  const tc = useTranslations('common')
+
+  const METRICS = [
+    { label: t('myStudents'), value: '156', icon: <PeopleOutlineIcon /> },
+    { label: t('publishedCourses'), value: '8', icon: <MenuBookOutlinedIcon /> },
+    { label: t('avgCompletion'), value: '78%', icon: <BarChartOutlinedIcon /> },
+    { label: t('pendingReviews'), value: '12', icon: <MenuBookOutlinedIcon /> },
+  ]
+
+  const QUICK_ACTIONS = [
+    { label: t('createCourse'), icon: <AddCircleOutlineIcon />, onClick: () => router.push('/courses'), color: 'primary.main', bg: '#e1f2ef' },
+    { label: t('viewStudents'), icon: <PeopleOutlineIcon />, onClick: () => router.push('/dashboard'), color: '#1d4f7a', bg: '#e8f0fa' },
+    { label: t('viewAnalytics'), icon: <BarChartOutlinedIcon />, onClick: () => router.push('/dashboard'), color: '#5a3a8a', bg: '#ede8f5' },
+  ]
+
+  return (
+    <DashboardLayout>
+      <RoleHeader user={user} subtitle={t('subtitle')} />
+      <Box sx={{ p: { xs: 2, md: 3 } }}>
+        {/* Stats */}
+        <Grid container spacing={1.5} sx={{ mb: 2.5 }}>
+          {METRICS.map(m => (
+            <Grid item xs={6} md={3} key={m.label}>
+              <Card>
+                <CardContent sx={{ p: 1.75, '&:last-child': { pb: 1.75 } }}>
+                  <Typography variant="overline" sx={{ color: 'text.disabled', display: 'block', mb: 0.5 }}>{m.label}</Typography>
+                  <Typography sx={{ fontFamily: '"DM Serif Display",serif', fontSize: '2rem', lineHeight: 1.1 }}>{m.value}</Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+
+        <Grid container spacing={2}>
+          {/* My courses */}
+          <Grid item xs={12} md={8}>
+            <Card sx={{ height: '100%' }}>
+              <CardContent>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
+                  <Typography variant="subtitle2">{t('myCourses')}</Typography>
+                  <Typography variant="caption" sx={{ color: 'primary.main', cursor: 'pointer' }} onClick={() => router.push('/courses')}>{tc('seeAll')} →</Typography>
+                </Box>
+                {TEACHER_COURSES.map((c, i) => (
+                  <Box
+                    key={c.id}
+                    onClick={() => router.push(`/courses/${c.id}`)}
+                    sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 1.25, borderBottom: i < TEACHER_COURSES.length - 1 ? '1px solid' : 'none', borderColor: 'divider', cursor: 'pointer', '&:hover': { bgcolor: 'background.default', mx: -2, px: 2, borderRadius: 1 } }}
+                  >
+                    <Box sx={{ width: 40, height: 40, borderRadius: 1.5, bgcolor: c.thumbBg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem', flexShrink: 0 }}>{c.emoji}</Box>
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                      <Typography variant="body2" sx={{ fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.title}</Typography>
+                      <Typography variant="caption" color="text.secondary">{c.studentsCount} {t('studentsEnrolled')} · {c.level}</Typography>
+                    </Box>
+                    <Chip label={c.category} size="small" sx={{ fontSize: '0.65rem', height: 20 }} />
+                  </Box>
+                ))}
+              </CardContent>
+            </Card>
+          </Grid>
+
+          {/* Quick actions */}
+          <Grid item xs={12} md={4}>
+            <Card sx={{ height: '100%' }}>
+              <CardContent>
+                <Typography variant="subtitle2" sx={{ mb: 2 }}>{t('quickActions')}</Typography>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.25 }}>
+                  {QUICK_ACTIONS.map(a => (
+                    <Box
+                      key={a.label}
+                      onClick={a.onClick}
+                      sx={{ display: 'flex', alignItems: 'center', gap: 1.5, p: 1.5, borderRadius: 2, bgcolor: a.bg, cursor: 'pointer', transition: 'opacity 0.15s', '&:hover': { opacity: 0.8 } }}
+                    >
+                      <Box sx={{ color: a.color }}>{a.icon}</Box>
+                      <Typography variant="body2" sx={{ fontWeight: 600, color: a.color }}>{a.label}</Typography>
+                    </Box>
+                  ))}
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
+      </Box>
+    </DashboardLayout>
+  )
+}
+
+// ─── Admin view ────────────────────────────────────────────────────────────
+
+function AdminView({ user }: { user: AuthUser }) {
+  const router = useRouter()
+  const t = useTranslations('home.admin')
+
+  const METRICS = [
+    { label: t('totalUsers'), value: '12,400', delta: '+240 this month', up: true },
+    { label: t('totalCourses'), value: '340', delta: '+12 this month', up: true },
+    { label: t('monthlyRevenue'), value: '$142K', delta: '+18% vs last month', up: true },
+    { label: t('platformUptime'), value: '99.9%', delta: t('allHealthy'), up: true },
+  ]
+
+  const QUICK_LINKS = [
+    { label: t('manageUsers'), icon: <PeopleOutlineIcon />, href: '/admin', bg: '#e8f0fa', color: '#1d4f7a' },
+    { label: t('manageCourses'), icon: <MenuBookOutlinedIcon />, href: '/courses', bg: '#e1f2ef', color: '#1f6257' },
+    { label: t('viewReports'), icon: <BarChartOutlinedIcon />, href: '/admin', bg: '#ede8f5', color: '#5a3a8a' },
+    { label: t('systemHealth'), icon: <HealthAndSafetyOutlinedIcon />, href: '/admin', bg: '#faeaec', color: '#8a3040' },
+  ]
+
+  return (
+    <DashboardLayout>
+      <RoleHeader user={user} subtitle={t('subtitle')} />
+      <Box sx={{ p: { xs: 2, md: 3 } }}>
+        {/* Stats */}
+        <Grid container spacing={1.5} sx={{ mb: 2.5 }}>
+          {METRICS.map(m => (
+            <Grid item xs={6} md={3} key={m.label}>
+              <Card>
+                <CardContent sx={{ p: 1.75, '&:last-child': { pb: 1.75 } }}>
+                  <Typography variant="overline" sx={{ color: 'text.disabled', display: 'block', mb: 0.5 }}>{m.label}</Typography>
+                  <Typography sx={{ fontFamily: '"DM Serif Display",serif', fontSize: '1.85rem', lineHeight: 1.1 }}>{m.value}</Typography>
+                  <Typography variant="caption" sx={{ color: m.up ? 'success.main' : 'error.main', fontWeight: 500 }}>{m.delta}</Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+
+        {/* Quick access */}
+        <Card sx={{ mb: 2.5 }}>
+          <CardContent>
+            <Typography variant="subtitle2" sx={{ mb: 2 }}>{t('quickAccess')}</Typography>
+            <Grid container spacing={1.5}>
+              {QUICK_LINKS.map(l => (
+                <Grid item xs={6} sm={3} key={l.label}>
+                  <Box
+                    onClick={() => router.push(l.href)}
+                    sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, p: 2, borderRadius: 2, bgcolor: l.bg, cursor: 'pointer', transition: 'opacity 0.15s', '&:hover': { opacity: 0.8 } }}
+                  >
+                    <Box sx={{ color: l.color, '& svg': { fontSize: '1.75rem' } }}>{l.icon}</Box>
+                    <Typography variant="caption" sx={{ fontWeight: 600, color: l.color, textAlign: 'center' }}>{l.label}</Typography>
+                  </Box>
+                </Grid>
+              ))}
+            </Grid>
+          </CardContent>
+        </Card>
+
+        {/* CTA */}
+        <Button
+          variant="contained"
+          size="large"
+          startIcon={<AdminPanelSettingsOutlinedIcon />}
+          endIcon={<ArrowForwardIcon />}
+          onClick={() => router.push('/admin')}
+          sx={{ py: 1.5, px: 3 }}
+        >
+          {t('goToAdmin')}
+        </Button>
+      </Box>
+    </DashboardLayout>
   )
 }

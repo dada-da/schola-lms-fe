@@ -255,5 +255,74 @@
   "languageSwitcher": {
     "en": "English",
     "vi": "Tiếng Việt"
+  },
+  "home": {
+    "welcomeBack": "Welcome back",
+    "student": {
+      "subtitle": "Pick up where you left off",
+      "hoursThisWeek": "Hours this week",
+      "coursesInProgress": "Courses in progress",
+      "avgScore": "Avg. quiz score",
+      "dayStreak": "Day streak",
+      "continueLearning": "Continue learning",
+      "exploreCourses": "Explore new courses",
+      "goToDashboard": "Full dashboard",
+      "seeAll": "See all"
+    },
+    "teacher": {
+      "subtitle": "Manage your courses and students",
+      "myStudents": "My students",
+      "publishedCourses": "Published courses",
+      "avgCompletion": "Avg. completion",
+      "pendingReviews": "Pending reviews",
+      "myCourses": "My courses",
+      "createCourse": "Create course",
+      "viewStudents": "View students",
+      "viewAnalytics": "Analytics",
+      "quickActions": "Quick actions",
+      "studentsEnrolled": "students enrolled"
+    },
+    "admin": {
+      "subtitle": "Platform at a glance",
+      "totalUsers": "Total users",
+      "totalCourses": "Total courses",
+      "monthlyRevenue": "Monthly revenue",
+      "platformUptime": "Platform uptime",
+      "goToAdmin": "Open Admin Dashboard",
+      "quickAccess": "Quick access",
+      "manageUsers": "Manage users",
+      "manageCourses": "Manage courses",
+      "viewReports": "View reports",
+      "systemHealth": "System health",
+      "allHealthy": "All systems healthy"
+    }
+  },
+  "login": {
+    "title": "Welcome back",
+    "subtitle": "Sign in to your ScholaLMS account",
+    "email": "Email",
+    "password": "Password",
+    "signIn": "Sign in",
+    "noAccount": "Don't have an account?",
+    "register": "Register",
+    "networkError": "Unable to connect. Please try again.",
+    "invalidCredentials": "Invalid email or password"
+  },
+  "register": {
+    "title": "Create account",
+    "subtitle": "Join ScholaLMS and start learning",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm password",
+    "role": "I am a",
+    "roleStudent": "Student",
+    "roleTeacher": "Teacher",
+    "submit": "Create account",
+    "submitting": "Creating account…",
+    "haveAccount": "Already have an account?",
+    "signIn": "Sign in",
+    "passwordMismatch": "Passwords do not match",
+    "networkError": "Unable to connect. Please try again.",
+    "success": "Account created! Signing you in…"
   }
 }

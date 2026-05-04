@@ -255,5 +255,74 @@
   "languageSwitcher": {
     "en": "English",
     "vi": "Tiếng Việt"
+  },
+  "home": {
+    "welcomeBack": "Chào mừng trở lại",
+    "student": {
+      "subtitle": "Tiếp tục hành trình học tập của bạn",
+      "hoursThisWeek": "Giờ trong tuần",
+      "coursesInProgress": "Khóa đang học",
+      "avgScore": "Điểm TB kiểm tra",
+      "dayStreak": "Ngày liên tiếp",
+      "continueLearning": "Tiếp tục học",
+      "exploreCourses": "Khám phá khóa học mới",
+      "goToDashboard": "Trang học tập đầy đủ",
+      "seeAll": "Xem tất cả"
+    },
+    "teacher": {
+      "subtitle": "Quản lý khóa học và học viên",
+      "myStudents": "Học viên của tôi",
+      "publishedCourses": "Khóa đã xuất bản",
+      "avgCompletion": "Hoàn thành TB",
+      "pendingReviews": "Chờ chấm điểm",
+      "myCourses": "Khóa học của tôi",
+      "createCourse": "Tạo khóa học",
+      "viewStudents": "Xem học viên",
+      "viewAnalytics": "Phân tích",
+      "quickActions": "Thao tác nhanh",
+      "studentsEnrolled": "học viên đã ghi danh"
+    },
+    "admin": {
+      "subtitle": "Tổng quan nền tảng",
+      "totalUsers": "Tổng người dùng",
+      "totalCourses": "Tổng khóa học",
+      "monthlyRevenue": "Doanh thu tháng",
+      "platformUptime": "Thời gian hoạt động",
+      "goToAdmin": "Mở trang quản trị",
+      "quickAccess": "Truy cập nhanh",
+      "manageUsers": "Quản lý người dùng",
+      "manageCourses": "Quản lý khóa học",
+      "viewReports": "Xem báo cáo",
+      "systemHealth": "Sức khỏe hệ thống",
+      "allHealthy": "Tất cả hệ thống bình thường"
+    }
+  },
+  "login": {
+    "title": "Chào mừng trở lại",
+    "subtitle": "Đăng nhập vào tài khoản ScholaLMS của bạn",
+    "email": "Email",
+    "password": "Mật khẩu",
+    "signIn": "Đăng nhập",
+    "noAccount": "Chưa có tài khoản?",
+    "register": "Đăng ký",
+    "networkError": "Không thể kết nối. Vui lòng thử lại.",
+    "invalidCredentials": "Email hoặc mật khẩu không đúng"
+  },
+  "register": {
+    "title": "Tạo tài khoản",
+    "subtitle": "Tham gia ScholaLMS và bắt đầu học",
+    "email": "Email",
+    "password": "Mật khẩu",
+    "confirmPassword": "Xác nhận mật khẩu",
+    "role": "Tôi là",
+    "roleStudent": "Học viên",
+    "roleTeacher": "Giáo viên",
+    "submit": "Tạo tài khoản",
+    "submitting": "Đang tạo tài khoản…",
+    "haveAccount": "Đã có tài khoản?",
+    "signIn": "Đăng nhập",
+    "passwordMismatch": "Mật khẩu không khớp",
+    "networkError": "Không thể kết nối. Vui lòng thử lại.",
+    "success": "Tài khoản đã tạo! Đang đăng nhập…"
   }
 }

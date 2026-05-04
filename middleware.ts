@@ -18,21 +18,12 @@ const intlMiddleware = createMiddleware(routing)
 const PROTECTED_PREFIXES = ['/dashboard', '/courses', '/quiz', '/admin']
 
 /** Routes that logged-in users should be redirected away from. */
-const AUTH_ROUTES = ['/login', '/signup']
+const AUTH_ROUTES = ['/login', '/register', '/signup']
 
 // ─── Auth check ────────────────────────────────────────────────────────────
 
 function isAuthenticated(request: NextRequest): boolean {
-  const sessionCookie =
-    request.cookies.get('next-auth.session-token') ??
-    request.cookies.get('__Secure-next-auth.session-token') ??
-    request.cookies.get('schola-session')
-
-  if (process.env.NODE_ENV === 'production') {
-    return Boolean(sessionCookie)
-  }
-
-  return true
+  return Boolean(request.cookies.get('schola-session')?.value)
 }
 
 // ─── Helper to strip locale prefix ────────────────────────────────────────
@@ -75,6 +66,6 @@ export function middleware(request: NextRequest): NextResponse {
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|api/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff2?|ttf|otf)).*)',
+    '/((?!_next/static|_next/image|favicon.ico|api/|auth/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff2?|ttf|otf)).*)',
   ],
 }
