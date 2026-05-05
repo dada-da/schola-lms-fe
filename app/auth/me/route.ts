@@ -8,6 +8,9 @@ export async function GET(request: NextRequest) {
 
   try {
     const [, payload] = token.split('.')
+    if (!payload) {
+      return NextResponse.json({ message: 'Invalid token' }, { status: 401 })
+    }
     const decoded = JSON.parse(Buffer.from(payload, 'base64url').toString())
     return NextResponse.json({
       id: decoded.userId,
