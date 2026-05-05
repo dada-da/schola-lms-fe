@@ -2,6 +2,7 @@ import Link from 'next/link'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
+import Logo from '@/components/ui/Logo'
 
 export default function NotFound() {
   return (
@@ -19,16 +20,9 @@ export default function NotFound() {
             px: 3,
           }}
         >
-          <Typography
-            sx={{
-              fontFamily: '"DM Serif Display", Georgia, serif',
-              fontSize: '1.25rem',
-              color: '#1a1a2e',
-              mb: 4,
-            }}
-          >
-            Schola<Box component="span" sx={{ color: '#2d8a7a' }}>LMS</Box>
-          </Typography>
+          <Box sx={{ mb: 4 }}>
+            <Logo height={32} />
+          </Box>
           <Typography sx={{ fontSize: '4rem', mb: 2, lineHeight: 1 }}>🗺️</Typography>
           <Typography
             variant="h1"

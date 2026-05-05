@@ -22,6 +22,7 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 import MenuIcon from '@mui/icons-material/Menu'
 import CloseIcon from '@mui/icons-material/Close'
 import LanguageSwitcher from '@/components/ui/LanguageSwitcher'
+import Logo from '@/components/ui/Logo'
 import { COURSES } from '@/lib/data'
 
 const FEATURE_KEYS = [
@@ -55,9 +56,7 @@ export default function GuestView() {
   return (
     <Box sx={{ bgcolor: '#faf9f6' }}>
       <Box component="nav" sx={{ position: 'sticky', top: 0, zIndex: 100, bgcolor: '#faf9f6', borderBottom: '1px solid rgba(26,26,46,0.08)', px: { xs: 2, md: 4 }, py: 1.5, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Typography sx={{ fontFamily: '"DM Serif Display",serif', fontSize: '1.4rem', color: 'secondary.main' }}>
-          Schola<Box component="span" sx={{ color: 'primary.main' }}>LMS</Box>
-        </Typography>
+        <Logo height={36} />
         <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 2, alignItems: 'center' }}>
           {[
             { label: tc('features'), href: '#features' },
@@ -75,9 +74,7 @@ export default function GuestView() {
         </IconButton>
         <Drawer anchor="right" open={mobileOpen} onClose={() => setMobileOpen(false)} sx={{ display: { xs: 'block', md: 'none' }, '& .MuiDrawer-paper': { width: 260 } }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', px: 2, py: 1.5 }}>
-            <Typography sx={{ fontFamily: '"DM Serif Display",serif', fontSize: '1.2rem', color: 'secondary.main' }}>
-              Schola<Box component="span" sx={{ color: 'primary.main' }}>LMS</Box>
-            </Typography>
+            <Logo height={28} />
             <IconButton onClick={() => setMobileOpen(false)}><CloseIcon /></IconButton>
           </Box>
           <Divider />
@@ -261,9 +258,9 @@ export default function GuestView() {
       </Box>
 
       <Box sx={{ bgcolor: '#f0ede6', borderTop: '1px solid rgba(26,26,46,0.08)', py: 4, textAlign: 'center' }}>
-        <Typography sx={{ fontFamily: '"DM Serif Display",serif', fontSize: '1.2rem', color: 'secondary.main', mb: 0.5 }}>
-          Schola<Box component="span" sx={{ color: 'primary.main' }}>LMS</Box>
-        </Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'center', mb: 0.5 }}>
+          <Logo height={32} />
+        </Box>
         <Typography variant="caption" sx={{ color: 'text.disabled' }}>{t('footer')}</Typography>
       </Box>
     </Box>

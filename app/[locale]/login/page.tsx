@@ -16,8 +16,8 @@ import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined'
 import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined'
 import { useAuth } from '@/contexts/auth-context'
 import LanguageSwitcher from '@/components/ui/LanguageSwitcher'
+import Logo from '@/components/ui/Logo'
 
-// Label is vertically centered inside the field, floats to top on focus
 const centeredLabel = {
   InputLabelProps: {
     sx: {
@@ -72,20 +72,9 @@ export default function LoginPage() {
       }}
     >
       <Box sx={{ width: '100%', maxWidth: 420 }}>
-        <Link href="/" style={{ textDecoration: 'none' }}>
-          <Typography
-            sx={{
-              fontFamily: '"DM Serif Display", Georgia, serif',
-              fontSize: '1.75rem',
-              textAlign: 'center',
-              mb: 4,
-              cursor: 'pointer',
-              '&:hover': { opacity: 0.8 },
-            }}
-          >
-            Schola<Box component="span" sx={{ color: 'primary.main' }}>LMS</Box>
-          </Typography>
-        </Link>
+        <Box sx={{ display: 'flex', justifyContent: 'center', mb: 4 }}>
+          <Logo height={44} />
+        </Box>
 
         <Paper elevation={0} sx={{ p: 4, border: '1px solid', borderColor: 'divider', borderRadius: 3 }}>
           <Typography variant="h5" sx={{ fontWeight: 600, mb: 0.5, textAlign: 'center' }}>

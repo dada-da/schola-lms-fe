@@ -11,6 +11,7 @@ import Typography from '@mui/material/Typography'
 import Divider from '@mui/material/Divider'
 import Avatar from '@mui/material/Avatar'
 import IconButton from '@mui/material/IconButton'
+import Logo from '@/components/ui/Logo'
 import DashboardOutlinedIcon from '@mui/icons-material/DashboardOutlined'
 import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined'
 import CalendarTodayOutlinedIcon from '@mui/icons-material/CalendarTodayOutlined'
@@ -91,13 +92,8 @@ export default function Sidebar({
         px: 1,
       }}
     >
-      <Box sx={{ px: 1.5, mb: 3 }}>
-        <Typography
-          sx={{ fontFamily: '"DM Serif Display", Georgia, serif', fontSize: '1.25rem', color: '#fff', cursor: 'pointer' }}
-          onClick={() => { router.push('/'); onMobileClose?.() }}
-        >
-          Schola<Box component="span" sx={{ color: 'primary.main' }}>LMS</Box>
-        </Typography>
+      <Box sx={{ px: 1.5, mb: 3 }} onClick={() => onMobileClose?.()}>
+        <Logo height={28} />
       </Box>
 
       <List dense disablePadding sx={{ flex: 1, overflow: 'auto' }}>

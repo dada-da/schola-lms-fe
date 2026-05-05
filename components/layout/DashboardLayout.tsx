@@ -4,6 +4,7 @@ import Box from '@mui/material/Box'
 import IconButton from '@mui/material/IconButton'
 import MenuIcon from '@mui/icons-material/Menu'
 import Sidebar from '@/components/layout/Sidebar'
+import Logo from '@/components/ui/Logo'
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -26,9 +27,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <IconButton onClick={() => setMobileOpen(true)} sx={{ color: '#fff' }}>
             <MenuIcon />
           </IconButton>
-          <Box sx={{ fontFamily: '"DM Serif Display", Georgia, serif', fontSize: '1.1rem', color: '#fff' }}>
-            Schola<Box component="span" sx={{ color: 'primary.main' }}>LMS</Box>
-          </Box>
+          <Logo height={24} />
         </Box>
 
         {children}
