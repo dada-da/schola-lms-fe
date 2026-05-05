@@ -11,7 +11,11 @@
       "Bash(pnpm add:*)",
       "Bash(cp app/[locale]/dashboard/loading.tsx app/[locale]/dashboard/loading.tsx)",
       "Bash(ls app/[locale]/dashboard/)",
-      "Bash(pnpm build:*)"
+      "Bash(pnpm build:*)",
+      "Bash(mkdir -p /Users/solis/development/personal/schola-lms-next/components/home)"
+    ],
+    "additionalDirectories": [
+      "/Users/solis/development/personal/schola-lms-next/components"
     ]
   }
 }

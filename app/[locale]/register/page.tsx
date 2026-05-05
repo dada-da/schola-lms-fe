@@ -89,7 +89,6 @@ export default function RegisterPage() {
       }}
     >
       <Box sx={{ width: '100%', maxWidth: 420 }}>
-        {/* Brand → home */}
         <Link href="/" style={{ textDecoration: 'none' }}>
           <Typography
             sx={{
@@ -116,7 +115,6 @@ export default function RegisterPage() {
           {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
           <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            {/* Role picker */}
             <Box>
               <Typography variant="caption" sx={{ display: 'block', textAlign: 'center', mb: 1, color: 'text.secondary' }}>
                 {t('role')}

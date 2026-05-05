@@ -12,7 +12,6 @@ import DashboardLayout from '@/components/layout/DashboardLayout'
 export default function Loading() {
   return (
     <DashboardLayout>
-      {/* Header skeleton */}
       <Box
         sx={{
           px: 3,
@@ -34,7 +33,6 @@ export default function Loading() {
       </Box>
 
       <Box sx={{ p: 3 }}>
-        {/* Metric row */}
         <Grid container spacing={1.5} sx={{ mb: 2 }}>
           {Array.from({ length: 4 }).map((_, i) => (
             <Grid item xs={6} md={3} key={i}>
@@ -49,7 +47,6 @@ export default function Loading() {
           ))}
         </Grid>
 
-        {/* Main content area */}
         <Grid container spacing={1.5} sx={{ mb: 2 }}>
           <Grid item xs={12} md={8}>
             <Card>
@@ -75,7 +72,6 @@ export default function Loading() {
           </Grid>
         </Grid>
 
-        {/* Card list */}
         <Card>
           <CardContent>
             <Skeleton variant="text" width={160} height={18} sx={{ mb: 1.5 }} />

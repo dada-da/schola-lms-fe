@@ -56,7 +56,6 @@ export default function Dashboard() {
 
   return (
     <DashboardLayout>
-      {/* Header */}
       <Box sx={{ px: { xs: 2, md: 3 }, py: 2, bgcolor: 'background.paper', borderBottom: '1px solid', borderColor: 'divider', position: 'sticky', top: 0, zIndex: 40, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 1 }}>
         <Box sx={{ minWidth: 0 }}>
           <Typography variant="h4" sx={{ fontSize: { xs: '1.1rem', md: '1.35rem' } }}>{t('greeting')}</Typography>
@@ -66,7 +65,6 @@ export default function Dashboard() {
       </Box>
 
       <Box sx={{ p: { xs: 2, md: 3 } }}>
-        {/* Metrics */}
         <Grid container spacing={1.5} sx={{ mb: 2 }}>
           {METRICS.map(m => (
             <Grid item xs={6} md={3} key={m.label}>
@@ -79,7 +77,6 @@ export default function Dashboard() {
           ))}
         </Grid>
 
-        {/* Activity + Leaderboard */}
         <Grid container spacing={1.5} sx={{ mb: 2 }}>
           <Grid item xs={12} md={8}>
             <Card><CardContent>
@@ -112,7 +109,6 @@ export default function Dashboard() {
           </Grid>
         </Grid>
 
-        {/* In progress */}
         <Card sx={{ mb: 2 }}><CardContent>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1.5 }}>
             <Typography variant="subtitle2">{t('continueLearning')}</Typography>
@@ -133,7 +129,6 @@ export default function Dashboard() {
           ))}
         </CardContent></Card>
 
-        {/* Bottom row */}
         <Grid container spacing={1.5}>
           <Grid item xs={12} md={4}>
             <Card sx={{ height: '100%' }}><CardContent>

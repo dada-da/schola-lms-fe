@@ -72,7 +72,6 @@ export default function LoginPage() {
       }}
     >
       <Box sx={{ width: '100%', maxWidth: 420 }}>
-        {/* Brand → home */}
         <Link href="/" style={{ textDecoration: 'none' }}>
           <Typography
             sx={{

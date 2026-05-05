@@ -90,7 +90,6 @@ export default function CourseDetail() {
       <Box sx={{ p: { xs: 2, md: 3 } }}>
         <Grid container spacing={2} alignItems="flex-start">
           <Grid item xs={12} md={8}>
-            {/* Video player */}
             <Card sx={{ mb: 2, overflow: 'hidden' }}>
               <Box sx={{ height: { xs: 200, md: 280 }, bgcolor: 'secondary.main', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 1.5, position: 'relative', background: 'linear-gradient(135deg, #1a1a2e 0%, #2d3a5e 100%)' }}>
                 <Box sx={{ position: 'absolute', top: -40, right: -40, width: 200, height: 200, bgcolor: 'primary.main', opacity: 0.1, borderRadius: '50%' }} />
@@ -110,12 +109,10 @@ export default function CourseDetail() {
               </Box>
             </Card>
 
-            {/* Tabs */}
             <Tabs value={activeTab} onChange={(_, v) => setActiveTab(v)} variant="scrollable" scrollButtons="auto" sx={{ mb: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
               {[t('overview'), t('curriculum'), t('discussion'), t('resources')].map(label => <Tab key={label} label={label} />)}
             </Tabs>
 
-            {/* Overview */}
             {activeTab === 0 && (
               <Card><CardContent>
                 <Typography variant="h5" sx={{ mb: 1 }}>{course.title}</Typography>
@@ -142,7 +139,6 @@ export default function CourseDetail() {
               </CardContent></Card>
             )}
 
-            {/* Curriculum */}
             {activeTab === 1 && (
               <Box>
                 {MODULES.map((mod, mi) => (
@@ -165,7 +161,6 @@ export default function CourseDetail() {
               </Box>
             )}
 
-            {/* Discussion */}
             {activeTab === 2 && (
               <Card><CardContent>
                 {DISCUSSIONS.map((d, i) => (
@@ -191,7 +186,6 @@ export default function CourseDetail() {
               </CardContent></Card>
             )}
 
-            {/* Resources */}
             {activeTab === 3 && (
               <Card><CardContent>
                 {RESOURCES.map((r, i) => (
@@ -208,7 +202,6 @@ export default function CourseDetail() {
             )}
           </Grid>
 
-          {/* Sidebar */}
           <Grid item xs={12} md={4}>
             <Card sx={{ mb: 2 }}><CardContent>
               <Typography variant="subtitle2" sx={{ mb: 1.5 }}>{t('yourProgress')}</Typography>

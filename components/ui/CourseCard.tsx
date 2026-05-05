@@ -36,7 +36,6 @@ export default function CourseCard({ course, showProgress = false }: { course: C
         flexDirection: 'column',
       }}
     >
-      {/* Thumb */}
       <Box
         sx={{
           height: 120,
@@ -52,24 +51,20 @@ export default function CourseCard({ course, showProgress = false }: { course: C
       </Box>
 
       <CardContent sx={{ p: 1.75, flex: 1, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-        {/* Category */}
         <Chip
           label={course.category}
           size="small"
           sx={{ alignSelf: 'flex-start', bgcolor: catStyle.bg, color: catStyle.color, height: 20, fontSize: '0.62rem' }}
         />
 
-        {/* Title */}
         <Typography variant="subtitle2" sx={{ fontWeight: 600, fontSize: '0.9rem', lineHeight: 1.35, mt: 0.25 }}>
           {course.title}
         </Typography>
 
-        {/* Instructor */}
         <Typography variant="caption" sx={{ color: 'text.secondary' }}>
           {course.instructor}
         </Typography>
 
-        {/* Rating + duration */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mt: 'auto', pt: 0.75 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25 }}>
             <StarRateRoundedIcon sx={{ fontSize: 14, color: '#c8a96e' }} />
@@ -86,7 +81,6 @@ export default function CourseCard({ course, showProgress = false }: { course: C
           }
         </Box>
 
-        {/* Progress bar (if enrolled) */}
         {showProgress && course.progress > 0 && (
           <Box sx={{ mt: 1 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>

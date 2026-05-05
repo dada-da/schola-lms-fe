@@ -102,7 +102,6 @@ export default function AdminPage() {
       </Box>
 
       <Box sx={{ p: { xs: 2, md: 3 } }}>
-        {/* KPIs */}
         <Grid container spacing={1.5} sx={{ mb: 2 }}>
           {KPIS.map(m => (
             <Grid item xs={6} md={3} key={m.label}>
@@ -115,7 +114,6 @@ export default function AdminPage() {
           ))}
         </Grid>
 
-        {/* Charts */}
         <Grid container spacing={1.5} sx={{ mb: 2 }}>
           <Grid item xs={12} md={7}>
             <Card><CardContent>
@@ -164,7 +162,6 @@ export default function AdminPage() {
           </Grid>
         </Grid>
 
-        {/* Users + Courses */}
         <Grid container spacing={1.5} sx={{ mb: 2 }}>
           <Grid item xs={12} md={7}>
             <Card><CardContent>
@@ -226,7 +223,6 @@ export default function AdminPage() {
           </Grid>
         </Grid>
 
-        {/* Bottom row */}
         <Grid container spacing={1.5}>
           <Grid item xs={12} md={4}>
             <Card sx={{ height: '100%' }}><CardContent>

@@ -52,7 +52,7 @@ export default function QuizPage() {
   const start = () => { setPhase('quiz'); setStartTime(Date.now()) }
   const reset = () => { setAnswers({}); setCurrentQ(0); setTimeLeft(15 * 60); setPhase('intro') }
 
-  if (phase === 'intro') return (
+  if (phase === 'intro') {return (
     <DashboardLayout>
       <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'center', p: { xs: 2, md: 6 } }}>
         <Card sx={{ maxWidth: 500, width: '100%' }}><CardContent sx={{ p: 4, textAlign: 'center' }}>
@@ -79,9 +79,9 @@ export default function QuizPage() {
         </CardContent></Card>
       </Box>
     </DashboardLayout>
-  )
+  )}
 
-  if (phase === 'results') return (
+  if (phase === 'results') {return (
     <DashboardLayout>
       <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'center', p: { xs: 2, md: 6 } }}>
         <Card sx={{ maxWidth: 500, width: '100%' }}><CardContent sx={{ p: 4, textAlign: 'center' }}>
@@ -112,11 +112,10 @@ export default function QuizPage() {
         </CardContent></Card>
       </Box>
     </DashboardLayout>
-  )
+  )}
 
   return (
     <DashboardLayout>
-      {/* Quiz header */}
       <Box sx={{ px: { xs: 2, md: 3 }, py: 1.5, bgcolor: 'background.paper', borderBottom: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center', gap: { xs: 1, md: 2 }, position: 'sticky', top: 0, zIndex: 40 }}>
         <Typography variant="body2" sx={{ color: 'text.secondary', flexShrink: 0, display: { xs: 'none', sm: 'block' } }}>{t('title')}</Typography>
         <LinearProgress variant="determinate" value={((currentQ + 1) / QUESTIONS.length) * 100} sx={{ flex: 1 }} color="primary" />

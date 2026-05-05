@@ -13,7 +13,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <Sidebar mobileOpen={mobileOpen} onMobileClose={() => setMobileOpen(false)} />
 
       <Box component="main" sx={{ flex: 1, minWidth: 0, overflow: 'auto' }}>
-        {/* Mobile top bar */}
         <Box
           sx={{
             display: { xs: 'flex', md: 'none' },

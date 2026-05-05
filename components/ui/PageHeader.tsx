@@ -1,21 +1,21 @@
-'use client'
-import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
-import Breadcrumbs from '@mui/material/Breadcrumbs'
-import Link from '@mui/material/Link'
-import { useRouter } from 'next/navigation'
+'use client';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import Breadcrumbs from '@mui/material/Breadcrumbs';
+import Link from '@mui/material/Link';
+import { useRouter } from 'next/navigation';
 
 interface Crumb {
-  label: string
-  href?: string
+  label: string;
+  href?: string;
 }
 
 interface PageHeaderProps {
-  title: string
-  subtitle?: string
-  breadcrumbs?: Crumb[]
+  title: string;
+  subtitle?: string;
+  breadcrumbs?: Crumb[];
   /** Slot for action buttons on the right */
-  actions?: React.ReactNode
+  actions?: React.ReactNode;
 }
 
 /**
@@ -29,8 +29,13 @@ interface PageHeaderProps {
  *     actions={<Button variant="contained">Enroll</Button>}
  *   />
  */
-export default function PageHeader({ title, subtitle, breadcrumbs, actions }: PageHeaderProps) {
-  const router = useRouter()
+export default function PageHeader({
+  title,
+  subtitle,
+  breadcrumbs,
+  actions,
+}: PageHeaderProps) {
+  const router = useRouter();
 
   return (
     <Box
@@ -52,14 +57,13 @@ export default function PageHeader({ title, subtitle, breadcrumbs, actions }: Pa
       }}
     >
       <Box sx={{ minWidth: 0 }}>
-        {/* Breadcrumbs */}
         {breadcrumbs && breadcrumbs.length > 0 && (
           <Breadcrumbs
             aria-label="breadcrumb"
             sx={{ mb: 0.25, '& .MuiBreadcrumbs-separator': { mx: 0.5 } }}
           >
             {breadcrumbs.map((crumb, i) => {
-              const isLast = i === breadcrumbs.length - 1
+              const isLast = i === breadcrumbs.length - 1;
               return isLast ? (
                 <Typography
                   key={crumb.label}
@@ -79,12 +83,11 @@ export default function PageHeader({ title, subtitle, breadcrumbs, actions }: Pa
                 >
                   {crumb.label}
                 </Link>
-              )
+              );
             })}
           </Breadcrumbs>
         )}
 
-        {/* Title */}
         <Typography
           variant="h4"
           sx={{
@@ -98,20 +101,23 @@ export default function PageHeader({ title, subtitle, breadcrumbs, actions }: Pa
           {title}
         </Typography>
 
-        {/* Subtitle */}
         {subtitle && (
-          <Typography variant="caption" sx={{ color: 'text.secondary', mt: 0.1, display: 'block' }}>
+          <Typography
+            variant="caption"
+            sx={{ color: 'text.secondary', mt: 0.1, display: 'block' }}
+          >
             {subtitle}
           </Typography>
         )}
       </Box>
 
-      {/* Right-side actions */}
       {actions && (
-        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexShrink: 0 }}>
+        <Box
+          sx={{ display: 'flex', gap: 1, alignItems: 'center', flexShrink: 0 }}
+        >
           {actions}
         </Box>
       )}
     </Box>
-  )
+  );
 }

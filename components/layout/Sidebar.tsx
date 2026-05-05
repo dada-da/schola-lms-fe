@@ -91,7 +91,6 @@ export default function Sidebar({
         px: 1,
       }}
     >
-      {/* Logo */}
       <Box sx={{ px: 1.5, mb: 3 }}>
         <Typography
           sx={{ fontFamily: '"DM Serif Display", Georgia, serif', fontSize: '1.25rem', color: '#fff', cursor: 'pointer' }}
@@ -101,7 +100,6 @@ export default function Sidebar({
         </Typography>
       </Box>
 
-      {/* Main nav */}
       <List dense disablePadding sx={{ flex: 1, overflow: 'auto' }}>
         {NAV.map((item, i) => {
           if ('section' in item) {
@@ -135,7 +133,6 @@ export default function Sidebar({
         })}
       </List>
 
-      {/* Bottom */}
       <Box>
         <Divider sx={{ borderColor: 'rgba(255,255,255,0.08)', mb: 1 }} />
         <List dense disablePadding>
@@ -188,7 +185,6 @@ export default function Sidebar({
 
   return (
     <>
-      {/* Desktop: permanent sidebar */}
       <Box
         component="nav"
         sx={{
@@ -204,7 +200,6 @@ export default function Sidebar({
         {content}
       </Box>
 
-      {/* Mobile: temporary drawer */}
       <Drawer
         variant="temporary"
         open={mobileOpen}
