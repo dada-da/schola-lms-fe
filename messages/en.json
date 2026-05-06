@@ -168,6 +168,16 @@
     "noCoursesHint": "Try adjusting your search or filters",
     "continueLearning": "Continue learning"
   },
+  "browse": {
+    "eyebrow": "Course catalogue",
+    "title": "Find your next course",
+    "subtitle": "Search hand-picked courses from world-class instructors. Filter by topic, level and what's right for you.",
+    "categoriesLabel": "Categories",
+    "ctaEyebrow": "Ready to dive in?",
+    "ctaTitle": "Create a free account to start learning",
+    "ctaSubtitle": "Bookmark courses, track progress and join cohort discussions — all on the free plan.",
+    "ctaPrimary": "Start free"
+  },
   "manageCourses": {
     "title": "Manage courses",
     "subtitle": "Create, edit, and delete your courses",

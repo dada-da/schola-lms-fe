@@ -1,5 +1,4 @@
 'use client'
-import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from '@/i18n/navigation'
 import Box from '@mui/material/Box'
@@ -11,18 +10,10 @@ import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
 import Chip from '@mui/material/Chip'
 import LinearProgress from '@mui/material/LinearProgress'
-import IconButton from '@mui/material/IconButton'
-import Drawer from '@mui/material/Drawer'
-import List from '@mui/material/List'
-import ListItemButton from '@mui/material/ListItemButton'
-import ListItemText from '@mui/material/ListItemText'
-import Divider from '@mui/material/Divider'
 import StarRateRoundedIcon from '@mui/icons-material/StarRateRounded'
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
-import MenuIcon from '@mui/icons-material/Menu'
-import CloseIcon from '@mui/icons-material/Close'
-import LanguageSwitcher from '@/components/ui/LanguageSwitcher'
 import Logo from '@/components/ui/Logo'
+import GuestNav from '@/components/home/GuestNav'
 import { COURSES } from '@/lib/data'
 
 const FEATURE_KEYS = [
@@ -51,52 +42,10 @@ export default function GuestView() {
   const router = useRouter()
   const t = useTranslations('landing')
   const tc = useTranslations('common')
-  const [mobileOpen, setMobileOpen] = useState(false)
 
   return (
     <Box sx={{ bgcolor: '#faf9f6' }}>
-      <Box component="nav" sx={{ position: 'sticky', top: 0, zIndex: 100, bgcolor: '#faf9f6', borderBottom: '1px solid rgba(26,26,46,0.08)', px: { xs: 2, md: 4 }, py: 1.5, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Logo height={36} />
-        <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 2, alignItems: 'center' }}>
-          {[
-            { label: tc('features'), href: '#features' },
-            { label: tc('courses'), href: '#courses' },
-            { label: tc('pricing'), href: '#pricing' },
-          ].map(l => (
-            <Typography key={l.href} component="a" href={l.href} sx={{ fontSize: '0.875rem', color: 'text.secondary', textDecoration: 'none', '&:hover': { color: 'primary.main' } }}>{l.label}</Typography>
-          ))}
-          <LanguageSwitcher />
-          <Button variant="outlined" size="small" color="secondary" onClick={() => router.push('/login')}>{tc('signIn')}</Button>
-          <Button variant="contained" size="small" color="primary" onClick={() => router.push('/login')}>{tc('startFree')}</Button>
-        </Box>
-        <IconButton sx={{ display: { xs: 'flex', md: 'none' } }} onClick={() => setMobileOpen(true)}>
-          <MenuIcon />
-        </IconButton>
-        <Drawer anchor="right" open={mobileOpen} onClose={() => setMobileOpen(false)} sx={{ display: { xs: 'block', md: 'none' }, '& .MuiDrawer-paper': { width: 260 } }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', px: 2, py: 1.5 }}>
-            <Logo height={28} />
-            <IconButton onClick={() => setMobileOpen(false)}><CloseIcon /></IconButton>
-          </Box>
-          <Divider />
-          <List>
-            {[
-              { label: tc('features'), href: '#features' },
-              { label: tc('courses'), href: '#courses' },
-              { label: tc('pricing'), href: '#pricing' },
-            ].map(l => (
-              <ListItemButton key={l.href} component="a" href={l.href} onClick={() => setMobileOpen(false)}>
-                <ListItemText primary={l.label} />
-              </ListItemButton>
-            ))}
-          </List>
-          <Divider />
-          <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-            <LanguageSwitcher />
-            <Button fullWidth variant="outlined" color="secondary" onClick={() => { router.push('/login'); setMobileOpen(false) }}>{tc('signIn')}</Button>
-            <Button fullWidth variant="contained" color="primary" onClick={() => { router.push('/login'); setMobileOpen(false) }}>{tc('startFree')}</Button>
-          </Box>
-        </Drawer>
-      </Box>
+      <GuestNav />
 
       <Container maxWidth="lg" sx={{ pt: { xs: 5, md: 10 }, pb: { xs: 5, md: 8 }, px: { xs: 2, md: 3 } }}>
         <Grid container spacing={6} alignItems="center">
@@ -112,7 +61,7 @@ export default function GuestView() {
               <Button variant="contained" size="large" color="primary" endIcon={<ArrowForwardIcon />} onClick={() => router.push('/login')}>
                 {t('startLearningFree')}
               </Button>
-              <Button variant="outlined" size="large" color="secondary" onClick={() => router.push('/login')}>
+              <Button variant="outlined" size="large" color="secondary" onClick={() => router.push('/browse')}>
                 {t('browseCourses')}
               </Button>
             </Box>
@@ -182,7 +131,7 @@ export default function GuestView() {
           <Grid container spacing={2}>
             {COURSES.slice(0, 3).map(c => (
               <Grid item xs={12} sm={6} md={4} key={c.id}>
-                <Card onClick={() => router.push('/login')} sx={{ cursor: 'pointer', height: '100%', transition: 'transform 0.18s', '&:hover': { transform: 'translateY(-3px)', boxShadow: 3 } }}>
+                <Card onClick={() => router.push('/browse')} sx={{ cursor: 'pointer', height: '100%', transition: 'transform 0.18s', '&:hover': { transform: 'translateY(-3px)', boxShadow: 3 } }}>
                   <Box sx={{ height: 120, bgcolor: c.thumbBg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.5rem' }}>{c.emoji}</Box>
                   <CardContent>
                     <Typography variant="overline" sx={{ color: 'primary.main' }}>{c.category}</Typography>
@@ -200,7 +149,7 @@ export default function GuestView() {
             ))}
           </Grid>
           <Box sx={{ textAlign: 'center', mt: 4 }}>
-            <Button variant="outlined" color="secondary" size="large" endIcon={<ArrowForwardIcon />} onClick={() => router.push('/login')}>
+            <Button variant="outlined" color="secondary" size="large" endIcon={<ArrowForwardIcon />} onClick={() => router.push('/browse')}>
               {t('browseAllCourses')}
             </Button>
           </Box>

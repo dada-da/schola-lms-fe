@@ -168,6 +168,16 @@
     "noCoursesHint": "Thử điều chỉnh tìm kiếm hoặc bộ lọc",
     "continueLearning": "Tiếp tục học"
   },
+  "browse": {
+    "eyebrow": "Danh mục khóa học",
+    "title": "Tìm khóa học tiếp theo của bạn",
+    "subtitle": "Khám phá các khóa học được tuyển chọn từ những giảng viên hàng đầu. Lọc theo chủ đề, cấp độ và phù hợp với bạn.",
+    "categoriesLabel": "Danh mục",
+    "ctaEyebrow": "Sẵn sàng bắt đầu?",
+    "ctaTitle": "Tạo tài khoản miễn phí để bắt đầu học",
+    "ctaSubtitle": "Lưu khóa học, theo dõi tiến độ và tham gia thảo luận nhóm — tất cả miễn phí.",
+    "ctaPrimary": "Bắt đầu miễn phí"
+  },
   "manageCourses": {
     "title": "Quản lý khóa học",
     "subtitle": "Tạo, chỉnh sửa và xóa các khóa học của bạn",
