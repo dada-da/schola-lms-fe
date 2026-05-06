@@ -14,6 +14,8 @@ import CircularProgress from '@mui/material/CircularProgress'
 import InputAdornment from '@mui/material/InputAdornment'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import { useTheme } from '@mui/material/styles'
+import Typography from '@mui/material/Typography'
+import RichTextEditor, { isHtmlEmpty } from './RichTextEditor'
 import { extractYouTubeId, type ContentType, type LessonFormValues } from './types'
 
 const MAX_TITLE_LEN = 255
@@ -72,11 +74,13 @@ export default function LessonFormDialog({
 
   const sequenceNum = Math.max(1, Number(sequenceStr) || 0)
   const durationNum = durationStr.trim() === '' ? 0 : Math.max(0, Number(durationStr) || 0)
+  const isVideo = contentType === 'VIDEO'
   const trimmedContent = content.trim()
-  const videoIdValid = contentType !== 'VIDEO' || extractYouTubeId(trimmedContent) !== null
+  const contentEmpty = isVideo ? trimmedContent.length === 0 : isHtmlEmpty(content)
+  const videoIdValid = !isVideo || extractYouTubeId(trimmedContent) !== null
   const canSubmit =
     title.trim().length > 0 &&
-    trimmedContent.length > 0 &&
+    !contentEmpty &&
     sequenceNum >= 1 &&
     videoIdValid
 
@@ -90,7 +94,7 @@ export default function LessonFormDialog({
         description: description.trim(),
         sequence: sequenceNum,
         durationMinutes: durationNum,
-        content: trimmedContent,
+        content: isVideo ? trimmedContent : content,
         contentType,
       })
     } catch (e) {
@@ -168,16 +172,20 @@ export default function LessonFormDialog({
             <MenuItem value="VIDEO">{t('contentTypeVideo')}</MenuItem>
           </TextField>
           {contentType === 'TEXT' ? (
-            <TextField
-              label={t('content')}
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              fullWidth
-              multiline
-              minRows={6}
-              required
-              helperText={t('contentTextHint')}
-            />
+            <Box>
+              <Typography
+                variant="caption"
+                sx={{ display: 'block', color: 'text.secondary', mb: 0.5 }}
+              >
+                {t('content')}
+              </Typography>
+              <RichTextEditor
+                value={content}
+                onChange={setContent}
+                placeholder={t('contentTextHint')}
+                disabled={submitting}
+              />
+            </Box>
           ) : (
             <TextField
               label={t('videoUrl')}
