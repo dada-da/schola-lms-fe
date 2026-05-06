@@ -1,25 +1,33 @@
-'use client'
-import { useTranslations } from 'next-intl'
-import Card from '@mui/material/Card'
-import CardContent from '@mui/material/CardContent'
-import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
-import Chip from '@mui/material/Chip'
-import IconButton from '@mui/material/IconButton'
-import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
-import { categoryLabel, type Category, type Course } from './types'
+'use client';
+import { useTranslations } from 'next-intl';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import Chip from '@mui/material/Chip';
+import IconButton from '@mui/material/IconButton';
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined';
+import { categoryLabel, type Category, type Course } from './types';
 
 interface Props {
-  course: Course
-  categories: Category[]
-  onEdit: (c: Course) => void
-  onDelete: (c: Course) => void
+  course: Course;
+  categories: Category[];
+  onEdit: (c: Course) => void;
+  onDelete: (c: Course) => void;
+  onManageLessons: (c: Course) => void;
 }
 
-export default function CourseListItem({ course: c, categories, onEdit, onDelete }: Props) {
-  const t = useTranslations('manageCourses')
-  const thumbSize = { xs: 56, sm: 72 }
+export default function CourseListItem({
+  course: c,
+  categories,
+  onEdit,
+  onDelete,
+  onManageLessons,
+}: Props) {
+  const t = useTranslations('manageCourses');
+  const thumbSize = { xs: 56, sm: 72 };
 
   return (
     <Card>
@@ -46,7 +54,7 @@ export default function CourseListItem({ course: c, categories, onEdit, onDelete
               flexShrink: 0,
             }}
             onError={(e) => {
-              ;(e.currentTarget as HTMLImageElement).style.visibility = 'hidden'
+              (e.currentTarget as HTMLImageElement).style.visibility = 'hidden';
             }}
           />
         ) : (
@@ -68,7 +76,15 @@ export default function CourseListItem({ course: c, categories, onEdit, onDelete
         )}
 
         <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap', mb: 0.25 }}>
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 1,
+              flexWrap: 'wrap',
+              mb: 0.25,
+            }}
+          >
             <Typography
               variant="subtitle1"
               sx={{
@@ -84,11 +100,14 @@ export default function CourseListItem({ course: c, categories, onEdit, onDelete
               <Chip
                 label={categoryLabel(c.category, categories)}
                 size="small"
-                sx={{ height: 20, fontSize: '0.62rem' }}
+                sx={{ height: 20, fontSize: '0.62rem', width: 'fit-content' }}
               />
             )}
             {c.price > 0 && (
-              <Typography variant="caption" sx={{ fontWeight: 600, color: 'secondary.main' }}>
+              <Typography
+                variant="caption"
+                sx={{ fontWeight: 600, color: 'secondary.main' }}
+              >
                 ${Number(c.price).toFixed(2)}
               </Typography>
             )}
@@ -121,15 +140,34 @@ export default function CourseListItem({ course: c, categories, onEdit, onDelete
             </Box>
           )}
 
-          <Typography variant="caption" sx={{ color: 'text.disabled', display: 'block', mt: 0.75 }}>
+          <Typography
+            variant="caption"
+            sx={{ color: 'text.disabled', display: 'block', mt: 0.75 }}
+          >
             {t('lessons', { count: c.lessonCount ?? 0 })}
-            {c.totalDurationMinutes ? ` · ${t('duration', { minutes: c.totalDurationMinutes })}` : ''}
-            {c.createdAt ? ` · ${t('createdAt', { date: new Date(c.createdAt).toLocaleDateString() })}` : ''}
+            {c.totalDurationMinutes
+              ? ` · ${t('duration', { minutes: c.totalDurationMinutes })}`
+              : ''}
+            {c.createdAt
+              ? ` · ${t('createdAt', { date: new Date(c.createdAt).toLocaleDateString() })}`
+              : ''}
           </Typography>
         </Box>
 
         <Box sx={{ display: 'flex', gap: 0.25, flexShrink: 0 }}>
-          <IconButton onClick={() => onEdit(c)} size="small" aria-label={t('editCourse')}>
+          <IconButton
+            onClick={() => onManageLessons(c)}
+            size="small"
+            aria-label={t('manageLessons')}
+            title={t('manageLessons')}
+          >
+            <MenuBookOutlinedIcon fontSize="small" />
+          </IconButton>
+          <IconButton
+            onClick={() => onEdit(c)}
+            size="small"
+            aria-label={t('editCourse')}
+          >
             <EditOutlinedIcon fontSize="small" />
           </IconButton>
           <IconButton
@@ -143,5 +181,5 @@ export default function CourseListItem({ course: c, categories, onEdit, onDelete
         </Box>
       </CardContent>
     </Card>
-  )
+  );
 }

@@ -155,7 +155,7 @@ export default function Sidebar({
             )
           })}
         </List>
-        <Box sx={{ px: 1.5, pt: 1, mb: 1 }}>
+        <Box sx={{ px: 1.5, pt: 1, mb: 1, color: 'rgba(255,255,255,0.55)' }}>
           <LanguageSwitcher />
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, px: 1.5, pt: 1.5, mt: 0.5, borderTop: '1px solid rgba(255,255,255,0.08)' }}>

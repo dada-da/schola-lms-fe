@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
+import { useParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { useRouter } from '@/i18n/navigation'
 import Box from '@mui/material/Box'
@@ -11,28 +12,31 @@ import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
 import Alert from '@mui/material/Alert'
 import CircularProgress from '@mui/material/CircularProgress'
+import IconButton from '@mui/material/IconButton'
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import DashboardLayout from '@/components/layout/DashboardLayout'
-import CourseFormDialog from '@/components/manage-courses/CourseFormDialog'
-import CourseListItem from '@/components/manage-courses/CourseListItem'
-import { categoryName } from '@/components/manage-courses/types'
-import type { Category, Course, CourseFormValues } from '@/components/manage-courses/types'
+import LessonFormDialog from '@/components/manage-lessons/LessonFormDialog'
+import LessonListItem from '@/components/manage-lessons/LessonListItem'
+import { lessonCourseId, type Lesson, type LessonFormValues } from '@/components/manage-lessons/types'
 import { useAuth } from '@/contexts/auth-context'
 
-type DialogState = { mode: 'create' } | { mode: 'edit'; course: Course } | null
+type DialogState = { mode: 'create' } | { mode: 'edit'; lesson: Lesson } | null
 
-export default function ManageCoursesPage() {
-  const t = useTranslations('manageCourses')
+export default function ManageLessonsPage() {
+  const t = useTranslations('manageLessons')
   const router = useRouter()
+  const params = useParams<{ id: string }>()
+  const courseId = Number(params?.id)
   const { user, loading: authLoading } = useAuth()
   const isTeacher = user?.role?.toUpperCase() === 'TEACHER'
 
-  const [courses, setCourses] = useState<Course[]>([])
-  const [categories, setCategories] = useState<Category[]>([])
+  const [lessons, setLessons] = useState<Lesson[]>([])
+  const [courseTitle, setCourseTitle] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [dialog, setDialog] = useState<DialogState>(null)
-  const [confirmDelete, setConfirmDelete] = useState<Course | null>(null)
+  const [confirmDelete, setConfirmDelete] = useState<Lesson | null>(null)
   const [deleting, setDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState('')
 
@@ -42,27 +46,44 @@ export default function ManageCoursesPage() {
       router.push('/login')
       return
     }
-    if (!isTeacher) return
+    if (!isTeacher || !courseId) return
     void loadAll()
-  }, [authLoading, user, isTeacher])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authLoading, user, isTeacher, courseId])
 
   async function loadAll() {
     setLoading(true)
     setError('')
     try {
-      const [coursesRes, catsRes] = await Promise.all([
+      const [lessonsRes, courseRes] = await Promise.all([
+        fetch(`/api/lesson?courseId=${courseId}`),
         fetch('/api/course'),
-        fetch('/api/category'),
       ])
-      if (!coursesRes.ok) {
+      if (!lessonsRes.ok) {
         setError(t('loadFailed'))
       } else {
-        const data: Course[] = await coursesRes.json()
-        setCourses(Array.isArray(data) ? data : [])
+        const data = await lessonsRes.json()
+        const raw: unknown = Array.isArray(data)
+          ? data
+          : Array.isArray((data as { content?: unknown })?.content)
+            ? (data as { content: unknown[] }).content
+            : Array.isArray((data as { data?: unknown })?.data)
+              ? (data as { data: unknown[] }).data
+              : []
+        const list = raw as Lesson[]
+        const tagged = list.filter((l) => lessonCourseId(l) !== undefined)
+        const scoped =
+          tagged.length > 0
+            ? tagged.filter((l) => lessonCourseId(l) === courseId)
+            : list
+        setLessons([...scoped].sort((a, b) => a.sequence - b.sequence))
       }
-      if (catsRes.ok) {
-        const cats: Category[] = await catsRes.json()
-        setCategories(Array.isArray(cats) ? cats : [])
+      if (courseRes.ok) {
+        const courses = await courseRes.json()
+        if (Array.isArray(courses)) {
+          const found = courses.find((c: { id: number }) => c.id === courseId)
+          if (found) setCourseTitle(found.title ?? '')
+        }
       }
     } catch {
       setError(t('loadFailed'))
@@ -71,10 +92,10 @@ export default function ManageCoursesPage() {
     }
   }
 
-  async function handleSave(values: CourseFormValues) {
-    if (!dialog || !user) return
-    const body = { ...values, userId: user.id }
-    const url = dialog.mode === 'create' ? '/api/course' : `/api/course/${dialog.course.id}`
+  async function handleSave(values: LessonFormValues) {
+    if (!dialog) return
+    const body = { ...values, courseId }
+    const url = dialog.mode === 'create' ? '/api/lesson' : `/api/lesson/${dialog.lesson.id}`
     const method = dialog.mode === 'create' ? 'POST' : 'PATCH'
     const res = await fetch(url, {
       method,
@@ -94,7 +115,7 @@ export default function ManageCoursesPage() {
     setDeleting(true)
     setDeleteError('')
     try {
-      const res = await fetch(`/api/course/${confirmDelete.id}`, { method: 'DELETE' })
+      const res = await fetch(`/api/lesson/${confirmDelete.id}`, { method: 'DELETE' })
       if (!res.ok && res.status !== 204) throw new Error()
       setConfirmDelete(null)
       await loadAll()
@@ -125,17 +146,29 @@ export default function ManageCoursesPage() {
     )
   }
 
-  const editing = dialog?.mode === 'edit' ? dialog.course : null
-  const initialValues: CourseFormValues | undefined = editing
+  if (!courseId) {
+    return (
+      <DashboardLayout>
+        <Box sx={{ p: { xs: 2, md: 3 } }}>
+          <Alert severity="error">{t('invalidCourse')}</Alert>
+        </Box>
+      </DashboardLayout>
+    )
+  }
+
+  const editing = dialog?.mode === 'edit' ? dialog.lesson : null
+  const initialValues: LessonFormValues | undefined = editing
     ? {
         title: editing.title ?? '',
         description: editing.description ?? '',
-        thumbnailUrl: editing.thumbnailUrl ?? '',
-        price: editing.price ?? 0,
-        category: categoryName(editing.category),
-        tags: Array.isArray(editing.tags) ? editing.tags : [],
+        sequence: editing.sequence ?? 1,
+        durationMinutes: editing.durationMinutes ?? 0,
+        content: editing.content ?? '',
+        contentType: editing.contentType ?? 'TEXT',
       }
     : undefined
+  const nextSequence =
+    lessons.length === 0 ? 1 : Math.max(...lessons.map((l) => l.sequence)) + 1
 
   return (
     <DashboardLayout>
@@ -153,13 +186,31 @@ export default function ManageCoursesPage() {
           flexWrap: 'wrap',
         }}
       >
-        <Box sx={{ minWidth: 0 }}>
-          <Typography variant="h4" sx={{ fontSize: { xs: '1.1rem', md: '1.35rem' } }}>
-            {t('title')}
-          </Typography>
-          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-            {t('subtitle')}
-          </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
+          <IconButton
+            size="small"
+            onClick={() => router.push('/courses/manage')}
+            aria-label={t('back')}
+          >
+            <ArrowBackIcon />
+          </IconButton>
+          <Box sx={{ minWidth: 0 }}>
+            <Typography variant="h4" sx={{ fontSize: { xs: '1.1rem', md: '1.35rem' } }}>
+              {t('title')}
+            </Typography>
+            <Typography
+              variant="caption"
+              sx={{
+                color: 'text.secondary',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                display: 'block',
+              }}
+            >
+              {courseTitle || t('subtitle')}
+            </Typography>
+          </Box>
         </Box>
         <Button
           variant="contained"
@@ -167,7 +218,7 @@ export default function ManageCoursesPage() {
           onClick={() => setDialog({ mode: 'create' })}
           sx={{ flexShrink: 0 }}
         >
-          {t('createCourse')}
+          {t('createLesson')}
         </Button>
       </Box>
 
@@ -182,36 +233,32 @@ export default function ManageCoursesPage() {
           <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
             <CircularProgress />
           </Box>
-        ) : courses.length === 0 ? (
+        ) : lessons.length === 0 ? (
           <Box sx={{ textAlign: 'center', py: 6 }}>
-            <Typography sx={{ fontSize: '2rem', mb: 1 }}>📚</Typography>
+            <Typography sx={{ fontSize: '2rem', mb: 1 }}>📖</Typography>
             <Typography variant="body1" sx={{ color: 'text.secondary' }}>
               {t('empty')}
             </Typography>
           </Box>
         ) : (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-            {courses.map((c) => (
-              <CourseListItem
-                key={c.id}
-                course={c}
-                categories={categories}
-                onEdit={(course) => setDialog({ mode: 'edit', course })}
+            {lessons.map((l) => (
+              <LessonListItem
+                key={l.id}
+                lesson={l}
+                onEdit={(lesson) => setDialog({ mode: 'edit', lesson })}
                 onDelete={setConfirmDelete}
-                onManageLessons={(course) =>
-                  router.push(`/courses/manage/${course.id}/lessons`)
-                }
               />
             ))}
           </Box>
         )}
       </Box>
 
-      <CourseFormDialog
+      <LessonFormDialog
         open={dialog !== null}
         mode={dialog?.mode ?? 'create'}
         initialValues={initialValues}
-        categories={categories}
+        defaultSequence={nextSequence}
         onSave={handleSave}
         onClose={() => setDialog(null)}
       />
