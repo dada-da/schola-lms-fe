@@ -61,20 +61,20 @@ export default function Sidebar({
     { section: t('main') },
     { label: t('overview'), icon: <DashboardOutlinedIcon fontSize="small" />, href: '/dashboard' },
     { label: t('myCourses'), icon: <MenuBookOutlinedIcon fontSize="small" />, href: myCoursesHref },
-    { label: t('schedule'), icon: <CalendarTodayOutlinedIcon fontSize="small" />, href: '#' },
-    { label: t('aiTutor'), icon: <SmartToyOutlinedIcon fontSize="small" />, href: '#' },
+    { label: t('schedule'), icon: <CalendarTodayOutlinedIcon fontSize="small" />, href: '/schedule' },
+    { label: t('aiTutor'), icon: <SmartToyOutlinedIcon fontSize="small" />, href: '/ai-tutor' },
     { section: t('progressSection') },
-    { label: t('analytics'), icon: <BarChartOutlinedIcon fontSize="small" />, href: '#' },
-    { label: t('certificates'), icon: <EmojiEventsOutlinedIcon fontSize="small" />, href: '#' },
-    { label: t('goals'), icon: <TrackChangesOutlinedIcon fontSize="small" />, href: '#' },
+    { label: t('analytics'), icon: <BarChartOutlinedIcon fontSize="small" />, href: '/analytics' },
+    { label: t('certificates'), icon: <EmojiEventsOutlinedIcon fontSize="small" />, href: '/certificates' },
+    { label: t('goals'), icon: <TrackChangesOutlinedIcon fontSize="small" />, href: '/goals' },
     { section: t('communitySection') },
-    { label: t('cohorts'), icon: <GroupsOutlinedIcon fontSize="small" />, href: '#' },
-    { label: t('discussions'), icon: <ChatBubbleOutlineOutlinedIcon fontSize="small" />, href: '#' },
+    { label: t('cohorts'), icon: <GroupsOutlinedIcon fontSize="small" />, href: '/cohorts' },
+    { label: t('discussions'), icon: <ChatBubbleOutlineOutlinedIcon fontSize="small" />, href: '/discussions' },
   ]
 
   const BOTTOM_NAV = [
     ...(isAdmin ? [{ label: t('admin'), icon: <AdminPanelSettingsOutlinedIcon fontSize="small" />, href: '/admin' }] : []),
-    { label: t('settings'), icon: <SettingsOutlinedIcon fontSize="small" />, href: '#' },
+    { label: t('settings'), icon: <SettingsOutlinedIcon fontSize="small" />, href: '/settings' },
   ]
 
   const handleNav = (href: string) => {

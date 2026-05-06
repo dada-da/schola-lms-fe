@@ -310,6 +310,11 @@
       "warning": "Warning"
     }
   },
+  "comingSoon": {
+    "badge": "Coming soon",
+    "description": "We're still building this feature. Check back soon — it'll be ready before you know it.",
+    "backToDashboard": "Back to dashboard"
+  },
   "courseCard": {
     "free": "Free",
     "completed": "Completed ✓",

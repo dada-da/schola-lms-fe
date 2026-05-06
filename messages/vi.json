@@ -310,6 +310,11 @@
       "warning": "Cảnh báo"
     }
   },
+  "comingSoon": {
+    "badge": "Sắp ra mắt",
+    "description": "Chúng tôi đang hoàn thiện tính năng này. Hãy quay lại sớm — sẽ có ngay thôi.",
+    "backToDashboard": "Quay lại trang chủ"
+  },
   "courseCard": {
     "free": "Miễn phí",
     "completed": "Hoàn thành ✓",
