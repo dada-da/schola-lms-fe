@@ -38,7 +38,7 @@ function validateEnv(): Env {
   return {
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL!,
     NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME!,
-    BACKEND_URL: process.env.BACKEND_URL ?? 'http://localhost:8080',
+    BACKEND_URL: process.env.BACKEND_URL ?? 'https://lms-be-us8q.onrender.com',
   }
 }
 
@@ -49,4 +49,4 @@ export const env = validateEnv()
 export const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
 export const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME ?? 'ScholaLMS'
 export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? ''
-export const BACKEND_URL = process.env.BACKEND_URL ?? 'http://localhost:8080'
+export const BACKEND_URL = process.env.BACKEND_URL ?? 'https://lms-be-us8q.onrender.com'
