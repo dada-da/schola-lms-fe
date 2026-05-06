@@ -66,7 +66,7 @@ export default function QuizPage() {
             {[{ n: QUESTIONS.length, l: tc('questions') }, { n: 15, l: tc('minutes') }, { n: '70%', l: tc('passMark') }].map(s => (
               <Grid item xs={4} key={s.l}>
                 <Box sx={{ bgcolor: 'background.default', borderRadius: 2, py: 1.5 }}>
-                  <Typography sx={{ fontFamily: '"DM Serif Display",serif', fontSize: '1.6rem' }}>{s.n}</Typography>
+                  <Typography sx={{ fontFamily: 'var(--font-serif), serif', fontSize: '1.6rem' }}>{s.n}</Typography>
                   <Typography variant="caption" sx={{ color: 'text.secondary' }}>{s.l}</Typography>
                 </Box>
               </Grid>
@@ -99,7 +99,7 @@ export default function QuizPage() {
             ].map(s => (
               <Grid item xs={4} key={s.l}>
                 <Box sx={{ bgcolor: s.color, borderRadius: 2, py: 1.5 }}>
-                  <Typography sx={{ fontFamily: '"DM Serif Display",serif', fontSize: '1.6rem', color: s.textColor }}>{s.n}</Typography>
+                  <Typography sx={{ fontFamily: 'var(--font-serif), serif', fontSize: '1.6rem', color: s.textColor }}>{s.n}</Typography>
                   <Typography variant="caption" sx={{ color: s.textColor, opacity: 0.7 }}>{s.l}</Typography>
                 </Box>
               </Grid>

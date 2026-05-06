@@ -33,8 +33,7 @@
   --color-green: #2d8a4a;
   --color-green-light: #e1f2e8;
 
-  --font-sans: "DM Sans", system-ui, sans-serif;
-  --font-serif: "DM Serif Display", Georgia, serif;
+  /* --font-sans and --font-serif are injected by next/font (see app/[locale]/layout.tsx) */
 
   --radius: 12px;
   --radius-sm: 8px;

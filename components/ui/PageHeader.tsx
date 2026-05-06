@@ -92,7 +92,7 @@ export default function PageHeader({
           variant="h4"
           sx={{
             fontSize: '1.35rem',
-            fontFamily: '"DM Serif Display", Georgia, serif',
+            fontFamily: 'var(--font-serif), Georgia, serif',
             whiteSpace: 'nowrap',
             overflow: 'hidden',
             textOverflow: 'ellipsis',

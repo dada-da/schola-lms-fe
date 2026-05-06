@@ -107,7 +107,7 @@ export default function AdminPage() {
             <Grid item xs={6} md={3} key={m.label}>
               <Card><CardContent sx={{ p: 1.75, '&:last-child': { pb: 1.75 } }}>
                 <Typography variant="overline" sx={{ color: 'text.disabled', display: 'block', mb: 0.5 }}>{m.label}</Typography>
-                <Typography sx={{ fontFamily: '"DM Serif Display",serif', fontSize: '2rem', lineHeight: 1.1 }}>{m.value}</Typography>
+                <Typography sx={{ fontFamily: 'var(--font-serif), serif', fontSize: '2rem', lineHeight: 1.1 }}>{m.value}</Typography>
                 <Typography variant="caption" sx={{ color: m.up ? 'success.main' : 'error.main', fontWeight: 500 }}>{m.delta}</Typography>
               </CardContent></Card>
             </Grid>
@@ -141,8 +141,8 @@ export default function AdminPage() {
                     <circle cx="60" cy="60" r="45" fill="none" stroke="#2d8a7a" strokeWidth="18" strokeDasharray="169.6 282.6" strokeDashoffset="0" strokeLinecap="round" transform="rotate(-90 60 60)"/>
                     <circle cx="60" cy="60" r="45" fill="none" stroke="#3a6ea8" strokeWidth="18" strokeDasharray="90.4 282.6" strokeDashoffset="-169.6" strokeLinecap="round" transform="rotate(-90 60 60)"/>
                     <circle cx="60" cy="60" r="45" fill="none" stroke="#c8a96e" strokeWidth="18" strokeDasharray="22.6 282.6" strokeDashoffset="-260" strokeLinecap="round" transform="rotate(-90 60 60)"/>
-                    <text x="60" y="55" textAnchor="middle" fontSize="10" fontWeight="600" fill="#1a1a2e" fontFamily="DM Serif Display,serif">$47.2k</text>
-                    <text x="60" y="67" textAnchor="middle" fontSize="6" fill="#8888a8" fontFamily="DM Sans,sans-serif">{t('thisMonth')}</text>
+                    <text x="60" y="55" textAnchor="middle" fontSize="10" fontWeight="600" fill="#1a1a2e" fontFamily='var(--font-serif), serif'>$47.2k</text>
+                    <text x="60" y="67" textAnchor="middle" fontSize="6" fill="#8888a8" fontFamily="var(--font-sans), sans-serif">{t('thisMonth')}</text>
                   </svg>
                 </Box>
                 <Box sx={{ flex: 1 }}>

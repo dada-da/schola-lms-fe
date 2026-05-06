@@ -69,7 +69,7 @@ export default function CoursesPage() {
             ].map(s => (
               <Grid item xs={6} md={3} key={s.label}>
                 <Box sx={{ bgcolor: s.color, borderRadius: 2, px: 2, py: 1.5 }}>
-                  <Typography sx={{ fontFamily: '"DM Serif Display",serif', fontSize: '1.8rem', color: s.text, lineHeight: 1.1 }}>{s.value}</Typography>
+                  <Typography sx={{ fontFamily: 'var(--font-serif), serif', fontSize: '1.8rem', color: s.text, lineHeight: 1.1 }}>{s.value}</Typography>
                   <Typography sx={{ fontSize: '0.72rem', color: s.text, opacity: 0.7, fontWeight: 600 }}>{s.label}</Typography>
                 </Box>
               </Grid>

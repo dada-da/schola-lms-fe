@@ -60,7 +60,7 @@ export default function ComingSoon({ title, description, emoji }: Props) {
         <Typography
           variant="h4"
           sx={{
-            fontFamily: '"DM Serif Display", Georgia, serif',
+            fontFamily: 'var(--font-serif), Georgia, serif',
             mb: 1,
             fontSize: { xs: '1.75rem', sm: '2.25rem' },
           }}

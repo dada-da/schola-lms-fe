@@ -42,7 +42,7 @@ export default function EmptyState({ emoji = '📭', title, description, action,
       <Typography sx={{ fontSize: '3rem', mb: 1.5, lineHeight: 1 }}>{emoji}</Typography>
       <Typography
         variant="h6"
-        sx={{ fontFamily: '"DM Serif Display", Georgia, serif', mb: 0.75 }}
+        sx={{ fontFamily: 'var(--font-serif), Georgia, serif', mb: 0.75 }}
       >
         {title}
       </Typography>

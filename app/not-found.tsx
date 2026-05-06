@@ -27,7 +27,7 @@ export default function NotFound() {
           <Typography
             variant="h1"
             sx={{
-              fontFamily: '"DM Serif Display", Georgia, serif',
+              fontFamily: 'var(--font-serif), Georgia, serif',
               fontSize: { xs: '3rem', md: '5rem' },
               color: '#1a1a2e',
               lineHeight: 1,
@@ -39,7 +39,7 @@ export default function NotFound() {
           <Typography
             variant="h5"
             sx={{
-              fontFamily: '"DM Serif Display", Georgia, serif',
+              fontFamily: 'var(--font-serif), Georgia, serif',
               color: '#1a1a2e',
               mb: 1.5,
             }}

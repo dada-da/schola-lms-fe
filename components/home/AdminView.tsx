@@ -45,7 +45,7 @@ export default function AdminView({ user }: { user: AuthUser }) {
               <Card>
                 <CardContent sx={{ p: 1.75, '&:last-child': { pb: 1.75 } }}>
                   <Typography variant="overline" sx={{ color: 'text.disabled', display: 'block', mb: 0.5 }}>{m.label}</Typography>
-                  <Typography sx={{ fontFamily: '"DM Serif Display",serif', fontSize: '1.85rem', lineHeight: 1.1 }}>{m.value}</Typography>
+                  <Typography sx={{ fontFamily: 'var(--font-serif), serif', fontSize: '1.85rem', lineHeight: 1.1 }}>{m.value}</Typography>
                   <Typography variant="caption" sx={{ color: m.up ? 'success.main' : 'error.main', fontWeight: 500 }}>{m.delta}</Typography>
                 </CardContent>
               </Card>

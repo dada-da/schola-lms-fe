@@ -31,7 +31,7 @@ export default function GlobalError({
       <Typography sx={{ fontSize: '3.5rem', mb: 2, lineHeight: 1 }}>⚠️</Typography>
       <Typography
         variant="h4"
-        sx={{ fontFamily: '"DM Serif Display", Georgia, serif', mb: 1.5 }}
+        sx={{ fontFamily: 'var(--font-serif), Georgia, serif', mb: 1.5 }}
       >
         Something went wrong
       </Typography>

@@ -132,7 +132,7 @@ export default function CourseEditCard({
           }}
         >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
-            <Typography variant="h6" sx={{ fontFamily: '"DM Serif Display", Georgia, serif' }}>
+            <Typography variant="h6" sx={{ fontFamily: 'var(--font-serif), Georgia, serif' }}>
               {t('courseDetails')}
             </Typography>
             {dirty && !submitting && (

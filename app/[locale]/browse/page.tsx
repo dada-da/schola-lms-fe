@@ -119,15 +119,15 @@ export default function BrowsePage() {
           </Typography>
           <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
             <Box sx={{ bgcolor: 'rgba(255,255,255,0.08)', borderRadius: 2, px: 2, py: 1 }}>
-              <Typography sx={{ fontFamily: '"DM Serif Display",serif', fontSize: '1.5rem', color: '#fff', lineHeight: 1.1 }}>{COURSES.length}</Typography>
+              <Typography sx={{ fontFamily: 'var(--font-serif), serif', fontSize: '1.5rem', color: '#fff', lineHeight: 1.1 }}>{COURSES.length}</Typography>
               <Typography sx={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.55)' }}>{tc('courses')}</Typography>
             </Box>
             <Box sx={{ bgcolor: 'rgba(255,255,255,0.08)', borderRadius: 2, px: 2, py: 1 }}>
-              <Typography sx={{ fontFamily: '"DM Serif Display",serif', fontSize: '1.5rem', color: '#fff', lineHeight: 1.1 }}>{(totalStudents / 1000).toFixed(1)}k+</Typography>
+              <Typography sx={{ fontFamily: 'var(--font-serif), serif', fontSize: '1.5rem', color: '#fff', lineHeight: 1.1 }}>{(totalStudents / 1000).toFixed(1)}k+</Typography>
               <Typography sx={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.55)' }}>{tc('students')}</Typography>
             </Box>
             <Box sx={{ bgcolor: 'rgba(255,255,255,0.08)', borderRadius: 2, px: 2, py: 1 }}>
-              <Typography sx={{ fontFamily: '"DM Serif Display",serif', fontSize: '1.5rem', color: '#fff', lineHeight: 1.1 }}>{CATEGORIES.length - 1}</Typography>
+              <Typography sx={{ fontFamily: 'var(--font-serif), serif', fontSize: '1.5rem', color: '#fff', lineHeight: 1.1 }}>{CATEGORIES.length - 1}</Typography>
               <Typography sx={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.55)' }}>{t('categoriesLabel')}</Typography>
             </Box>
           </Box>

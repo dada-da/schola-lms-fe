@@ -330,7 +330,7 @@ export default function ManageCourseDetailPage() {
             <Box>
               <Typography
                 variant="h6"
-                sx={{ fontFamily: '"DM Serif Display", Georgia, serif' }}
+                sx={{ fontFamily: 'var(--font-serif), Georgia, serif' }}
               >
                 {tl('title')}
               </Typography>

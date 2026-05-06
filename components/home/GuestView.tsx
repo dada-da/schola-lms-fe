@@ -112,7 +112,7 @@ export default function GuestView() {
                 {[{ n: '94%', l: t('completion') }, { n: '12k', l: t('learners') }, { n: '340+', l: tc('courses') }].map(s => (
                   <Grid item xs={4} key={s.l}>
                     <Box sx={{ bgcolor: 'rgba(255,255,255,0.06)', borderRadius: 2, p: 1 }}>
-                      <Typography sx={{ fontFamily: '"DM Serif Display",serif', fontSize: '1.4rem', color: '#fff' }}>{s.n}</Typography>
+                      <Typography sx={{ fontFamily: 'var(--font-serif), serif', fontSize: '1.4rem', color: '#fff' }}>{s.n}</Typography>
                       <Typography sx={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)' }}>{s.l}</Typography>
                     </Box>
                   </Grid>
@@ -127,7 +127,7 @@ export default function GuestView() {
         <Typography variant="overline" sx={{ color: 'text.disabled', display: 'block', mb: 1.5 }}>{t('trustedBy')}</Typography>
         <Box sx={{ display: 'flex', gap: 4, flexWrap: 'wrap', alignItems: 'center' }}>
           {['Accenture', 'Shopify', 'Notion', 'Figma', 'Stripe', 'Vercel'].map(c => (
-            <Typography key={c} sx={{ fontFamily: '"DM Serif Display",serif', fontSize: '1rem', color: 'text.disabled', opacity: 0.55 }}>{c}</Typography>
+            <Typography key={c} sx={{ fontFamily: 'var(--font-serif), serif', fontSize: '1rem', color: 'text.disabled', opacity: 0.55 }}>{c}</Typography>
           ))}
         </Box>
       </Container>
@@ -189,7 +189,7 @@ export default function GuestView() {
           <Grid container spacing={3}>
             {STAT_KEYS.map(s => (
               <Grid item xs={6} md={3} key={s.key} sx={{ textAlign: 'center' }}>
-                <Typography sx={{ fontFamily: '"DM Serif Display",serif', fontSize: { xs: '1.8rem', md: '2.6rem' }, color: '#fff' }}>{s.num}</Typography>
+                <Typography sx={{ fontFamily: 'var(--font-serif), serif', fontSize: { xs: '1.8rem', md: '2.6rem' }, color: '#fff' }}>{s.num}</Typography>
                 <Typography sx={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.45)', mt: 0.25 }}>{t(`stats.${s.key}`)}</Typography>
               </Grid>
             ))}
@@ -209,7 +209,7 @@ export default function GuestView() {
                   <Card sx={{ height: '100%', bgcolor: p.featured ? 'secondary.main' : 'background.paper', border: p.featured ? 'none' : undefined }}>
                     <CardContent sx={{ p: 3, display: 'flex', flexDirection: 'column', height: '100%' }}>
                       <Typography variant="overline" sx={{ color: p.featured ? 'rgba(255,255,255,0.45)' : 'text.disabled', mb: 1.5 }}>{t(`plans.${p.nameKey}`)}</Typography>
-                      <Typography sx={{ fontFamily: '"DM Serif Display",serif', fontSize: '2.4rem', color: p.featured ? '#fff' : 'text.primary' }}>{t(`plans.${p.nameKey}Price`)}</Typography>
+                      <Typography sx={{ fontFamily: 'var(--font-serif), serif', fontSize: '2.4rem', color: p.featured ? '#fff' : 'text.primary' }}>{t(`plans.${p.nameKey}Price`)}</Typography>
                       <Typography variant="caption" sx={{ color: p.featured ? 'rgba(255,255,255,0.35)' : 'text.secondary', mb: 2.5 }}>{t(`plans.${p.nameKey}Period`)}</Typography>
                       <Box sx={{ flex: 1 }}>
                         {features.map(f => (

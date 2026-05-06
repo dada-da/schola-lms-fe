@@ -2,10 +2,26 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages } from 'next-intl/server'
+import { Be_Vietnam_Pro, Playfair_Display } from 'next/font/google'
 import { routing } from '@/i18n/routing'
 import ThemeRegistry from '@/components/layout/ThemeRegistry'
 import { AuthProvider } from '@/contexts/auth-context'
 import '../globals.css'
+
+const sansFont = Be_Vietnam_Pro({
+  subsets: ['latin', 'latin-ext', 'vietnamese'],
+  weight: ['300', '400', '500', '600'],
+  variable: '--font-sans',
+  display: 'swap',
+})
+
+const serifFont = Playfair_Display({
+  subsets: ['latin', 'latin-ext', 'vietnamese'],
+  weight: ['400', '500', '600'],
+  style: ['normal', 'italic'],
+  variable: '--font-serif',
+  display: 'swap',
+})
 
 export const metadata: Metadata = {
   title: 'ScholaLMS',
@@ -28,15 +44,7 @@ export default async function LocaleLayout({
   const messages = await getMessages()
 
   return (
-    <html lang={locale}>
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap"
-          rel="stylesheet"
-        />
-      </head>
+    <html lang={locale} className={`${sansFont.variable} ${serifFont.variable}`}>
       <body id="__next">
         <NextIntlClientProvider messages={messages}>
           <ThemeRegistry>

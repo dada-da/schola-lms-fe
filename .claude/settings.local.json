@@ -15,7 +15,8 @@
       "Bash(mkdir -p /Users/solis/development/personal/schola-lms-next/components/home)",
       "Bash(npx tsc *)",
       "Bash(npx eslint *)",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(python3 -c ' *)"
     ],
     "additionalDirectories": [
       "/Users/solis/development/personal/schola-lms-next/components"

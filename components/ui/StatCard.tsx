@@ -50,7 +50,7 @@ export default function StatCard({ label, value, delta, deltaUp, icon, bgcolor, 
 
         <Typography
           sx={{
-            fontFamily: '"DM Serif Display", Georgia, serif',
+            fontFamily: 'var(--font-serif), Georgia, serif',
             fontSize: '2rem',
             lineHeight: 1.1,
             color: 'text.primary',

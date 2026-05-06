@@ -49,8 +49,8 @@ const config: Config = {
         },
       },
       fontFamily: {
-        sans: ['"DM Sans"', 'system-ui', 'sans-serif'],
-        serif: ['"DM Serif Display"', 'Georgia', 'serif'],
+        sans: ['var(--font-sans)', 'system-ui', 'sans-serif'],
+        serif: ['var(--font-serif)', 'Georgia', 'serif'],
       },
       borderRadius: {
         DEFAULT: '12px',

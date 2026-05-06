@@ -214,7 +214,7 @@ export default function CourseDetail() {
                 {[{ n: course.progress > 0 ? Math.round(course.totalModules * course.progress / 100) : 0, l: t('lessonsDone') }, { n: course.lessons, l: t('total') }, { n: `${Math.round(course.hours * (1 - course.progress / 100) * 10) / 10}h`, l: t('remaining') }].map(s => (
                   <Grid item xs={4} key={s.l}>
                     <Box sx={{ bgcolor: 'background.default', borderRadius: 1.5, p: 1, textAlign: 'center' }}>
-                      <Typography sx={{ fontFamily: '"DM Serif Display",serif', fontSize: '1.25rem' }}>{s.n}</Typography>
+                      <Typography sx={{ fontFamily: 'var(--font-serif), serif', fontSize: '1.25rem' }}>{s.n}</Typography>
                       <Typography variant="caption" sx={{ color: 'text.disabled', fontSize: '0.62rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{s.l}</Typography>
                     </Box>
                   </Grid>
