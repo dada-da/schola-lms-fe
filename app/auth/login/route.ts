@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-
-// Adjust this path to match your backend's login endpoint
-const BACKEND_URL = process.env.BACKEND_URL ?? 'http://localhost:8080'
+import { BACKEND_URL } from '@/lib/env'
 
 export async function POST(request: NextRequest) {
   const body = await request.json()

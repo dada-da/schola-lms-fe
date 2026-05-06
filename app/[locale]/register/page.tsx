@@ -25,11 +25,11 @@ const centeredLabel = {
   InputLabelProps: {
     sx: {
       '&:not(.MuiInputLabel-shrink)': {
-        left: '50%',
-        transform: 'translate(-50%, 16px) scale(1)',
+        top: '50%',
+        transform: 'translate(14px, -50%) scale(1)',
       },
       '&.MuiInputLabel-shrink': {
-        left: 0,
+        top: 0,
       },
     },
   },
