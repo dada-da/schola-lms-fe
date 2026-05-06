@@ -47,6 +47,10 @@ export default function Sidebar({
 
   const userInitials = user?.email.slice(0, 2).toUpperCase() ?? '??'
   const userLabel = user?.email ?? ''
+  const role = user?.role?.toUpperCase()
+  const isAdmin = role === 'ADMIN'
+  const isTeacher = role === 'TEACHER'
+  const myCoursesHref = isTeacher ? '/courses/manage' : '/courses'
 
   async function handleLogout() {
     await logout()
@@ -56,7 +60,7 @@ export default function Sidebar({
   const NAV: NavEntry[] = [
     { section: t('main') },
     { label: t('overview'), icon: <DashboardOutlinedIcon fontSize="small" />, href: '/dashboard' },
-    { label: t('myCourses'), icon: <MenuBookOutlinedIcon fontSize="small" />, href: '/courses' },
+    { label: t('myCourses'), icon: <MenuBookOutlinedIcon fontSize="small" />, href: myCoursesHref },
     { label: t('schedule'), icon: <CalendarTodayOutlinedIcon fontSize="small" />, href: '#' },
     { label: t('aiTutor'), icon: <SmartToyOutlinedIcon fontSize="small" />, href: '#' },
     { section: t('progressSection') },
@@ -69,7 +73,7 @@ export default function Sidebar({
   ]
 
   const BOTTOM_NAV = [
-    { label: t('admin'), icon: <AdminPanelSettingsOutlinedIcon fontSize="small" />, href: '/admin' },
+    ...(isAdmin ? [{ label: t('admin'), icon: <AdminPanelSettingsOutlinedIcon fontSize="small" />, href: '/admin' }] : []),
     { label: t('settings'), icon: <SettingsOutlinedIcon fontSize="small" />, href: '#' },
   ]
 

@@ -34,7 +34,7 @@ export default function TeacherView({ user }: { user: AuthUser }) {
   ]
 
   const QUICK_ACTIONS = [
-    { label: t('createCourse'), icon: <AddCircleOutlineIcon />, onClick: () => router.push('/courses'), color: 'primary.main', bg: '#e1f2ef' },
+    { label: t('createCourse'), icon: <AddCircleOutlineIcon />, onClick: () => router.push('/courses/manage'), color: 'primary.main', bg: '#e1f2ef' },
     { label: t('viewStudents'), icon: <PeopleOutlineIcon />, onClick: () => router.push('/dashboard'), color: '#1d4f7a', bg: '#e8f0fa' },
     { label: t('viewAnalytics'), icon: <BarChartOutlinedIcon />, onClick: () => router.push('/dashboard'), color: '#5a3a8a', bg: '#ede8f5' },
   ]
@@ -62,7 +62,7 @@ export default function TeacherView({ user }: { user: AuthUser }) {
               <CardContent>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
                   <Typography variant="subtitle2">{t('myCourses')}</Typography>
-                  <Typography variant="caption" sx={{ color: 'primary.main', cursor: 'pointer' }} onClick={() => router.push('/courses')}>{tc('seeAll')} →</Typography>
+                  <Typography variant="caption" sx={{ color: 'primary.main', cursor: 'pointer' }} onClick={() => router.push('/courses/manage')}>{tc('seeAll')} →</Typography>
                 </Box>
                 {TEACHER_COURSES.map((c, i) => (
                   <Box
