@@ -68,7 +68,7 @@ export default function RegisterPage() {
         throw new Error(err.message ?? t('networkError'))
       }
       await login(email, password)
-      router.push('/dashboard')
+      router.push('/')
     } catch (err) {
       setError(err instanceof Error ? err.message : t('networkError'))
     } finally {

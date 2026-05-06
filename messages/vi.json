@@ -32,7 +32,9 @@
     "timeTaken": "Thời gian",
     "progress": "Tiến độ",
     "adminView": "Trang quản trị",
-    "thisWeek": "Tuần này"
+    "thisWeek": "Tuần này",
+    "myDashboard": "Bảng điều khiển",
+    "signOut": "Đăng xuất"
   },
   "landing": {
     "aiTutoringChip": "Tích hợp gia sư AI",
@@ -57,6 +59,7 @@
     "pricingSection": "Bảng giá",
     "simplePlans": "Gói đơn giản, minh bạch",
     "footer": "© 2025 ScholaLMS · Xây dựng cho những tâm hồn ham học hỏi",
+    "welcomeBackUser": "Chào mừng trở lại, {email} — vào ngay bảng điều khiển của bạn.",
     "stats": {
       "activeLearners": "Học viên hoạt động",
       "expertCourses": "Khóa học chuyên gia",

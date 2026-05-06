@@ -53,9 +53,9 @@ export function middleware(request: NextRequest): NextResponse {
     return NextResponse.redirect(loginUrl)
   }
 
-  // 2. Authenticated user visiting login/signup → /dashboard
+  // 2. Authenticated user visiting login/signup → /
   if (authed && AUTH_ROUTES.some((route) => pathname.startsWith(route))) {
-    return NextResponse.redirect(new URL('/dashboard', request.url))
+    return NextResponse.redirect(new URL('/', request.url))
   }
 
   // 3. Run next-intl middleware for locale handling

@@ -32,7 +32,9 @@
     "timeTaken": "Time taken",
     "progress": "Progress",
     "adminView": "Admin view",
-    "thisWeek": "This week"
+    "thisWeek": "This week",
+    "myDashboard": "My dashboard",
+    "signOut": "Sign out"
   },
   "landing": {
     "aiTutoringChip": "Now with AI tutoring",
@@ -57,6 +59,7 @@
     "pricingSection": "Pricing",
     "simplePlans": "Simple, transparent plans",
     "footer": "© 2025 ScholaLMS · Built for curious minds everywhere",
+    "welcomeBackUser": "Welcome back, {email} — jump straight to your dashboard.",
     "stats": {
       "activeLearners": "Active learners",
       "expertCourses": "Expert-led courses",

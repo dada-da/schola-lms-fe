@@ -13,8 +13,11 @@ import ListItemText from '@mui/material/ListItemText'
 import Divider from '@mui/material/Divider'
 import MenuIcon from '@mui/icons-material/Menu'
 import CloseIcon from '@mui/icons-material/Close'
+import DashboardOutlinedIcon from '@mui/icons-material/DashboardOutlined'
+import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined'
 import LanguageSwitcher from '@/components/ui/LanguageSwitcher'
 import Logo from '@/components/ui/Logo'
+import { useAuth } from '@/contexts/auth-context'
 
 type NavLink = { label: string; href: string; type: 'anchor' | 'route' }
 
@@ -22,6 +25,7 @@ export default function GuestNav() {
   const router = useRouter()
   const pathname = usePathname()
   const tc = useTranslations('common')
+  const { user, logout } = useAuth()
   const [mobileOpen, setMobileOpen] = useState(false)
 
   const onHome = pathname === '/'
@@ -36,6 +40,60 @@ export default function GuestNav() {
     if (link.type === 'route') router.push(link.href)
   }
 
+  async function handleLogout() {
+    setMobileOpen(false)
+    await logout()
+    router.push('/')
+  }
+
+  const authedDesktop = (
+    <>
+      <Button
+        variant="contained"
+        size="small"
+        color="primary"
+        startIcon={<DashboardOutlinedIcon sx={{ fontSize: 18 }} />}
+        onClick={() => router.push('/dashboard')}
+      >
+        {tc('myDashboard')}
+      </Button>
+      <IconButton size="small" onClick={handleLogout} title={tc('signOut')} sx={{ color: 'text.secondary' }}>
+        <LogoutOutlinedIcon fontSize="small" />
+      </IconButton>
+    </>
+  )
+
+  const guestDesktop = (
+    <>
+      <Button variant="outlined" size="small" color="secondary" onClick={() => router.push('/login')}>{tc('signIn')}</Button>
+      <Button variant="contained" size="small" color="primary" onClick={() => router.push('/login')}>{tc('startFree')}</Button>
+    </>
+  )
+
+  const authedMobile = (
+    <>
+      <Button
+        fullWidth
+        variant="contained"
+        color="primary"
+        startIcon={<DashboardOutlinedIcon sx={{ fontSize: 18 }} />}
+        onClick={() => { router.push('/dashboard'); setMobileOpen(false) }}
+      >
+        {tc('myDashboard')}
+      </Button>
+      <Button fullWidth variant="outlined" color="secondary" startIcon={<LogoutOutlinedIcon fontSize="small" />} onClick={handleLogout}>
+        {tc('signOut')}
+      </Button>
+    </>
+  )
+
+  const guestMobile = (
+    <>
+      <Button fullWidth variant="outlined" color="secondary" onClick={() => { router.push('/login'); setMobileOpen(false) }}>{tc('signIn')}</Button>
+      <Button fullWidth variant="contained" color="primary" onClick={() => { router.push('/login'); setMobileOpen(false) }}>{tc('startFree')}</Button>
+    </>
+  )
+
   return (
     <Box component="nav" sx={{ position: 'sticky', top: 0, zIndex: 100, bgcolor: '#faf9f6', borderBottom: '1px solid rgba(26,26,46,0.08)', px: { xs: 2, md: 4 }, py: 1.5, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
       <Logo height={36} />
@@ -46,8 +104,7 @@ export default function GuestNav() {
           <Typography key={l.href} component="button" onClick={() => handleClick(l)} sx={{ background: 'none', border: 0, cursor: 'pointer', font: 'inherit', fontSize: '0.875rem', color: 'text.secondary', '&:hover': { color: 'primary.main' } }}>{l.label}</Typography>
         ))}
         <LanguageSwitcher />
-        <Button variant="outlined" size="small" color="secondary" onClick={() => router.push('/login')}>{tc('signIn')}</Button>
-        <Button variant="contained" size="small" color="primary" onClick={() => router.push('/login')}>{tc('startFree')}</Button>
+        {user ? authedDesktop : guestDesktop}
       </Box>
       <IconButton sx={{ display: { xs: 'flex', md: 'none' } }} onClick={() => setMobileOpen(true)}>
         <MenuIcon />
@@ -72,8 +129,7 @@ export default function GuestNav() {
         <Divider />
         <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
           <LanguageSwitcher />
-          <Button fullWidth variant="outlined" color="secondary" onClick={() => { router.push('/login'); setMobileOpen(false) }}>{tc('signIn')}</Button>
-          <Button fullWidth variant="contained" color="primary" onClick={() => { router.push('/login'); setMobileOpen(false) }}>{tc('startFree')}</Button>
+          {user ? authedMobile : guestMobile}
         </Box>
       </Drawer>
     </Box>

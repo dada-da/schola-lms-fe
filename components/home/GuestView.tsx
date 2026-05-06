@@ -12,8 +12,10 @@ import Chip from '@mui/material/Chip'
 import LinearProgress from '@mui/material/LinearProgress'
 import StarRateRoundedIcon from '@mui/icons-material/StarRateRounded'
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
+import DashboardOutlinedIcon from '@mui/icons-material/DashboardOutlined'
 import Logo from '@/components/ui/Logo'
 import GuestNav from '@/components/home/GuestNav'
+import { useAuth } from '@/contexts/auth-context'
 import { COURSES } from '@/lib/data'
 
 const FEATURE_KEYS = [
@@ -42,10 +44,29 @@ export default function GuestView() {
   const router = useRouter()
   const t = useTranslations('landing')
   const tc = useTranslations('common')
+  const { user } = useAuth()
+  const primaryCtaPath = user ? '/dashboard' : '/login'
 
   return (
     <Box sx={{ bgcolor: '#faf9f6' }}>
       <GuestNav />
+
+      {user && (
+        <Box sx={{ bgcolor: 'primary.main', color: '#fff', py: 1.25, px: { xs: 2, md: 4 }, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1.5, flexWrap: 'wrap' }}>
+          <Typography sx={{ fontSize: '0.875rem', fontWeight: 500 }}>
+            {t('welcomeBackUser', { email: user.email })}
+          </Typography>
+          <Button
+            variant="contained"
+            size="small"
+            startIcon={<DashboardOutlinedIcon sx={{ fontSize: 18 }} />}
+            onClick={() => router.push('/dashboard')}
+            sx={{ bgcolor: '#fff', color: 'primary.main', '&:hover': { bgcolor: 'rgba(255,255,255,0.9)' } }}
+          >
+            {tc('myDashboard')}
+          </Button>
+        </Box>
+      )}
 
       <Container maxWidth="lg" sx={{ pt: { xs: 5, md: 10 }, pb: { xs: 5, md: 8 }, px: { xs: 2, md: 3 } }}>
         <Grid container spacing={6} alignItems="center">
@@ -58,8 +79,15 @@ export default function GuestView() {
               {t('heroDesc')}
             </Typography>
             <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
-              <Button variant="contained" size="large" color="primary" endIcon={<ArrowForwardIcon />} onClick={() => router.push('/login')}>
-                {t('startLearningFree')}
+              <Button
+                variant="contained"
+                size="large"
+                color="primary"
+                startIcon={user ? <DashboardOutlinedIcon /> : undefined}
+                endIcon={user ? undefined : <ArrowForwardIcon />}
+                onClick={() => router.push(primaryCtaPath)}
+              >
+                {user ? tc('myDashboard') : t('startLearningFree')}
               </Button>
               <Button variant="outlined" size="large" color="secondary" onClick={() => router.push('/browse')}>
                 {t('browseCourses')}
@@ -195,7 +223,7 @@ export default function GuestView() {
                         fullWidth variant={p.featured ? 'contained' : 'outlined'}
                         color={p.featured ? 'primary' : 'secondary'}
                         sx={{ mt: 3, borderRadius: 100 }}
-                        onClick={() => router.push('/login')}
+                        onClick={() => router.push(primaryCtaPath)}
                       >{t(`plans.${p.nameKey}Cta`)}</Button>
                     </CardContent>
                   </Card>
