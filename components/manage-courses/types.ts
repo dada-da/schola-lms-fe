@@ -3,6 +3,10 @@ export interface Category {
   displayName: string
 }
 
+export type CourseStatus = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED'
+
+export const COURSE_STATUSES: CourseStatus[] = ['DRAFT', 'PUBLISHED', 'ARCHIVED']
+
 export interface Course {
   id: number
   title: string
@@ -13,8 +17,14 @@ export interface Course {
   tags: string[]
   lessonCount: number
   totalDurationMinutes: number
+  status?: CourseStatus | string
   createdAt: string
   updatedAt: string | null
+}
+
+export function normalizeCourseStatus(s: unknown): CourseStatus {
+  if (s === 'PUBLISHED' || s === 'ARCHIVED') return s
+  return 'DRAFT'
 }
 
 export interface CourseFormValues {

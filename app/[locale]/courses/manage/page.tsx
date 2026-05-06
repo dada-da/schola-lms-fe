@@ -5,21 +5,14 @@ import { useRouter } from '@/i18n/navigation'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
-import Dialog from '@mui/material/Dialog'
-import DialogTitle from '@mui/material/DialogTitle'
-import DialogContent from '@mui/material/DialogContent'
-import DialogActions from '@mui/material/DialogActions'
 import Alert from '@mui/material/Alert'
 import CircularProgress from '@mui/material/CircularProgress'
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
 import DashboardLayout from '@/components/layout/DashboardLayout'
 import CourseFormDialog from '@/components/manage-courses/CourseFormDialog'
 import CourseListItem from '@/components/manage-courses/CourseListItem'
-import { categoryName } from '@/components/manage-courses/types'
 import type { Category, Course, CourseFormValues } from '@/components/manage-courses/types'
 import { useAuth } from '@/contexts/auth-context'
-
-type DialogState = { mode: 'create' } | { mode: 'edit'; course: Course } | null
 
 export default function ManageCoursesPage() {
   const t = useTranslations('manageCourses')
@@ -31,10 +24,7 @@ export default function ManageCoursesPage() {
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [dialog, setDialog] = useState<DialogState>(null)
-  const [confirmDelete, setConfirmDelete] = useState<Course | null>(null)
-  const [deleting, setDeleting] = useState(false)
-  const [deleteError, setDeleteError] = useState('')
+  const [createOpen, setCreateOpen] = useState(false)
 
   useEffect(() => {
     if (authLoading) return
@@ -44,6 +34,7 @@ export default function ManageCoursesPage() {
     }
     if (!isTeacher) return
     void loadAll()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authLoading, user, isTeacher])
 
   async function loadAll() {
@@ -71,13 +62,11 @@ export default function ManageCoursesPage() {
     }
   }
 
-  async function handleSave(values: CourseFormValues) {
-    if (!dialog || !user) return
+  async function handleCreate(values: CourseFormValues) {
+    if (!user) return
     const body = { ...values, userId: user.id }
-    const url = dialog.mode === 'create' ? '/api/course' : `/api/course/${dialog.course.id}`
-    const method = dialog.mode === 'create' ? 'POST' : 'PATCH'
-    const res = await fetch(url, {
-      method,
+    const res = await fetch('/api/course', {
+      method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     })
@@ -85,24 +74,8 @@ export default function ManageCoursesPage() {
       const err = await res.json().catch(() => null)
       throw new Error(err?.message ?? t('saveFailed'))
     }
-    setDialog(null)
+    setCreateOpen(false)
     await loadAll()
-  }
-
-  async function handleDelete() {
-    if (!confirmDelete) return
-    setDeleting(true)
-    setDeleteError('')
-    try {
-      const res = await fetch(`/api/course/${confirmDelete.id}`, { method: 'DELETE' })
-      if (!res.ok && res.status !== 204) throw new Error()
-      setConfirmDelete(null)
-      await loadAll()
-    } catch {
-      setDeleteError(t('deleteFailed'))
-    } finally {
-      setDeleting(false)
-    }
   }
 
   if (authLoading) {
@@ -124,18 +97,6 @@ export default function ManageCoursesPage() {
       </DashboardLayout>
     )
   }
-
-  const editing = dialog?.mode === 'edit' ? dialog.course : null
-  const initialValues: CourseFormValues | undefined = editing
-    ? {
-        title: editing.title ?? '',
-        description: editing.description ?? '',
-        thumbnailUrl: editing.thumbnailUrl ?? '',
-        price: editing.price ?? 0,
-        category: categoryName(editing.category),
-        tags: Array.isArray(editing.tags) ? editing.tags : [],
-      }
-    : undefined
 
   return (
     <DashboardLayout>
@@ -164,7 +125,7 @@ export default function ManageCoursesPage() {
         <Button
           variant="contained"
           startIcon={<AddCircleOutlineIcon />}
-          onClick={() => setDialog({ mode: 'create' })}
+          onClick={() => setCreateOpen(true)}
           sx={{ flexShrink: 0 }}
         >
           {t('createCourse')}
@@ -196,11 +157,7 @@ export default function ManageCoursesPage() {
                 key={c.id}
                 course={c}
                 categories={categories}
-                onEdit={(course) => setDialog({ mode: 'edit', course })}
-                onDelete={setConfirmDelete}
-                onManageLessons={(course) =>
-                  router.push(`/courses/manage/${course.id}/lessons`)
-                }
+                onEdit={(course) => router.push(`/courses/manage/${course.id}`)}
               />
             ))}
           </Box>
@@ -208,40 +165,12 @@ export default function ManageCoursesPage() {
       </Box>
 
       <CourseFormDialog
-        open={dialog !== null}
-        mode={dialog?.mode ?? 'create'}
-        initialValues={initialValues}
+        open={createOpen}
+        mode="create"
         categories={categories}
-        onSave={handleSave}
-        onClose={() => setDialog(null)}
+        onSave={handleCreate}
+        onClose={() => setCreateOpen(false)}
       />
-
-      <Dialog
-        open={confirmDelete !== null}
-        onClose={() => !deleting && setConfirmDelete(null)}
-        maxWidth="xs"
-        fullWidth
-      >
-        <DialogTitle>{t('deleteConfirmTitle')}</DialogTitle>
-        <DialogContent>
-          {deleteError && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {deleteError}
-            </Alert>
-          )}
-          <Typography variant="body2">
-            {confirmDelete && t('deleteConfirmBody', { title: confirmDelete.title })}
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setConfirmDelete(null)} disabled={deleting}>
-            {t('cancel')}
-          </Button>
-          <Button onClick={handleDelete} color="error" variant="contained" disabled={deleting}>
-            {deleting ? <CircularProgress size={20} color="inherit" /> : t('delete')}
-          </Button>
-        </DialogActions>
-      </Dialog>
     </DashboardLayout>
   )
 }

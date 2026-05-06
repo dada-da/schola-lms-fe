@@ -7,24 +7,18 @@ import Typography from '@mui/material/Typography';
 import Chip from '@mui/material/Chip';
 import IconButton from '@mui/material/IconButton';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined';
 import { categoryLabel, type Category, type Course } from './types';
 
 interface Props {
   course: Course;
   categories: Category[];
   onEdit: (c: Course) => void;
-  onDelete: (c: Course) => void;
-  onManageLessons: (c: Course) => void;
 }
 
 export default function CourseListItem({
   course: c,
   categories,
   onEdit,
-  onDelete,
-  onManageLessons,
 }: Props) {
   const t = useTranslations('manageCourses');
   const thumbSize = { xs: 56, sm: 72 };
@@ -156,27 +150,12 @@ export default function CourseListItem({
 
         <Box sx={{ display: 'flex', gap: 0.25, flexShrink: 0 }}>
           <IconButton
-            onClick={() => onManageLessons(c)}
-            size="small"
-            aria-label={t('manageLessons')}
-            title={t('manageLessons')}
-          >
-            <MenuBookOutlinedIcon fontSize="small" />
-          </IconButton>
-          <IconButton
             onClick={() => onEdit(c)}
             size="small"
             aria-label={t('editCourse')}
+            title={t('editCourse')}
           >
             <EditOutlinedIcon fontSize="small" />
-          </IconButton>
-          <IconButton
-            onClick={() => onDelete(c)}
-            size="small"
-            color="error"
-            aria-label={t('deleteCourse')}
-          >
-            <DeleteOutlineIcon fontSize="small" />
           </IconButton>
         </Box>
       </CardContent>
