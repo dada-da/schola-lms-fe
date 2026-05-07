@@ -97,7 +97,7 @@ export default function Sidebar({
       }}
     >
       <Box sx={{ px: 1.5, mb: 3 }} onClick={() => onMobileClose?.()}>
-        <Logo height={28} />
+        <Logo height={28} white />
       </Box>
 
       <List dense disablePadding sx={{ flex: 1, overflow: 'auto' }}>

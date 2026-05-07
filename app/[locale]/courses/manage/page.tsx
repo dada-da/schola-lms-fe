@@ -64,11 +64,10 @@ export default function ManageCoursesPage() {
 
   async function handleCreate(values: CourseFormValues) {
     if (!user) return
-    const body = { ...values, userId: user.id }
     const res = await fetch('/api/course', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
+      body: JSON.stringify(values),
     })
     if (!res.ok) {
       const err = await res.json().catch(() => null)

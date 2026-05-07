@@ -121,11 +121,10 @@ export default function ManageCourseDetailPage() {
 
   async function handleSaveCourse(values: CourseFormValues) {
     if (!user) return
-    const body = { ...values, userId: user.id }
     const res = await fetch(`/api/course/${courseId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
+      body: JSON.stringify(values),
     })
     if (!res.ok) {
       const err = await res.json().catch(() => null)
@@ -137,11 +136,10 @@ export default function ManageCourseDetailPage() {
   async function handleChangeStatus(status: CourseStatus) {
     if (!user) return
     setError('')
-    const body = { status, userId: user.id }
     const res = await fetch(`/api/course/${courseId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
+      body: JSON.stringify({ status }),
     })
     if (!res.ok) {
       const err = await res.json().catch(() => null)
