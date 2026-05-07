@@ -75,8 +75,13 @@ export default function LessonFormDialog({
   const sequenceNum = Math.max(1, Number(sequenceStr) || 0)
   const durationNum = durationStr.trim() === '' ? 0 : Math.max(0, Number(durationStr) || 0)
   const isVideo = contentType === 'VIDEO'
+  const isQuiz = contentType === 'QUIZ'
   const trimmedContent = content.trim()
-  const contentEmpty = isVideo ? trimmedContent.length === 0 : isHtmlEmpty(content)
+  const contentEmpty = isVideo
+    ? trimmedContent.length === 0
+    : isQuiz
+      ? false
+      : isHtmlEmpty(content)
   const videoIdValid = !isVideo || extractYouTubeId(trimmedContent) !== null
   const canSubmit =
     title.trim().length > 0 &&
@@ -170,8 +175,9 @@ export default function LessonFormDialog({
           >
             <MenuItem value="TEXT">{t('contentTypeText')}</MenuItem>
             <MenuItem value="VIDEO">{t('contentTypeVideo')}</MenuItem>
+            <MenuItem value="QUIZ">{t('contentTypeQuiz')}</MenuItem>
           </TextField>
-          {contentType === 'TEXT' ? (
+          {contentType === 'TEXT' && (
             <Box>
               <Typography
                 variant="caption"
@@ -186,7 +192,8 @@ export default function LessonFormDialog({
                 disabled={submitting}
               />
             </Box>
-          ) : (
+          )}
+          {contentType === 'VIDEO' && (
             <TextField
               label={t('videoUrl')}
               value={content}
@@ -202,6 +209,9 @@ export default function LessonFormDialog({
                   : t('videoUrlHint')
               }
             />
+          )}
+          {contentType === 'QUIZ' && (
+            <Alert severity="info">{t('quizHint')}</Alert>
           )}
         </Box>
       </DialogContent>

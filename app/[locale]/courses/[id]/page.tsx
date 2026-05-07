@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { useRouter } from '@/i18n/navigation'
@@ -13,63 +13,192 @@ import Tabs from '@mui/material/Tabs'
 import Tab from '@mui/material/Tab'
 import LinearProgress from '@mui/material/LinearProgress'
 import Chip from '@mui/material/Chip'
-import Accordion from '@mui/material/Accordion'
-import AccordionSummary from '@mui/material/AccordionSummary'
-import AccordionDetails from '@mui/material/AccordionDetails'
 import Avatar from '@mui/material/Avatar'
 import TextField from '@mui/material/TextField'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import CircularProgress from '@mui/material/CircularProgress'
+import Alert from '@mui/material/Alert'
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline'
-import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked'
-import StarRateRoundedIcon from '@mui/icons-material/StarRateRounded'
+import CheckCircleIcon from '@mui/icons-material/CheckCircle'
+import OndemandVideoOutlinedIcon from '@mui/icons-material/OndemandVideoOutlined'
+import ArticleOutlinedIcon from '@mui/icons-material/ArticleOutlined'
+import QuizOutlinedIcon from '@mui/icons-material/QuizOutlined'
 import DashboardLayout from '@/components/layout/DashboardLayout'
-import { COURSES } from '@/lib/data'
+import {
+  categoryLabel,
+  type Category,
+  type Course,
+  type Enrollment,
+} from '@/components/manage-courses/types'
+import {
+  extractYouTubeId,
+  lessonCourseId,
+  type Lesson,
+} from '@/components/manage-lessons/types'
 
-type Lesson = { title: string; duration: string; done?: boolean; current?: boolean }
-type Module = { title: string; done: boolean; active?: boolean; lessons: Lesson[] }
-
-const MODULES: Module[] = [
-  { title: 'Foundations of UX Research', done: true, lessons: [
-    { title: 'What is UX research?', duration: '12 min', done: true },
-    { title: 'Research methods overview', duration: '18 min', done: true },
-    { title: 'Choosing the right method', duration: '22 min', done: true },
-  ]},
-  { title: 'Planning & Recruiting', done: true, lessons: [
-    { title: 'Writing a research plan', duration: '20 min', done: true },
-    { title: 'Recruiting participants', duration: '15 min', done: true },
-    { title: 'Screener surveys', duration: '10 min', done: true },
-  ]},
-  { title: 'Interview Techniques', done: false, active: true, lessons: [
-    { title: 'User Interview Techniques', duration: '35 min', current: true },
-    { title: 'Active listening', duration: '14 min' },
-    { title: 'Avoiding bias', duration: '18 min' },
-  ]},
-  { title: 'Usability Testing', done: false, lessons: [
-    { title: 'Moderated vs unmoderated', duration: '20 min' },
-    { title: 'Setting up tasks', duration: '12 min' },
-    { title: 'Analyzing results', duration: '25 min' },
-  ]},
-]
 const DISCUSSIONS = [
-  { initials: 'SM', name: 'Sarah M.', color: '#2d8a7a', time: '2 hours ago', text: 'The section on avoiding bias was really eye-opening. I had no idea I was leading participants without realizing it. The 5-second rule tip is something I\'m implementing immediately.', likes: 12 },
-  { initials: 'JT', name: 'James T.', color: '#3a6ea8', time: 'Yesterday', text: 'Kate\'s framework for synthesizing interview data is the clearest I\'ve seen. Would love to see a worked example with a real product though!', likes: 8 },
-  { initials: 'RL', name: 'Rita L.', color: '#c4596a', time: '3 days ago', text: 'Question: how do you handle participants who go completely off-script?', likes: 5 },
+  { initials: 'SM', name: 'Sarah M.', color: '#2d8a7a', time: '2 hours ago', text: 'The section on avoiding bias was really eye-opening. I had no idea I was leading participants without realizing it.', likes: 12 },
+  { initials: 'JT', name: 'James T.', color: '#3a6ea8', time: 'Yesterday', text: 'The framework for synthesizing interview data is the clearest I\'ve seen.', likes: 8 },
 ]
 const RESOURCES = [
   { icon: '📄', name: 'Research Plan Template', type: 'PDF', size: '1.2 MB', bg: '#faeaec' },
   { icon: '📊', name: 'Interview Debrief Spreadsheet', type: 'XLSX', size: '540 KB', bg: '#e1f2e8' },
-  { icon: '🎨', name: 'Affinity Mapping Figma Kit', type: 'Figma', size: '3.8 MB', bg: '#e8f0fa' },
-  { icon: '📋', name: 'Screener Survey Examples', type: 'PDF', size: '890 KB', bg: '#e8d5a8' },
 ]
 
 export default function CourseDetail() {
   const router = useRouter()
-  const params = useParams()
+  const params = useParams<{ id: string }>()
   const t = useTranslations('courseDetail')
   const tc = useTranslations('common')
+  const tl = useTranslations('manageLessons')
+  const tcourses = useTranslations('courses')
+
+  const courseId = Number(params?.id)
+
+  const [course, setCourse] = useState<Course | null>(null)
+  const [categories, setCategories] = useState<Category[]>([])
+  const [lessons, setLessons] = useState<Lesson[]>([])
+  const [enrolled, setEnrolled] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
   const [activeTab, setActiveTab] = useState(0)
-  const course = (COURSES.find(c => c.id === params.id) ?? COURSES[0])!
+  const [activeLessonId, setActiveLessonId] = useState<number | null>(null)
+  const [enrolling, setEnrolling] = useState(false)
+  const [doneLessonIds, setDoneLessonIds] = useState<Set<number>>(new Set())
+
+  useEffect(() => {
+    if (!courseId) return
+    void loadAll()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [courseId])
+
+  async function loadAll() {
+    setLoading(true)
+    setError('')
+    try {
+      const [coursesRes, catsRes, lessonsRes, enrolRes] = await Promise.all([
+        fetch('/api/course'),
+        fetch('/api/category'),
+        fetch(`/api/lesson?courseId=${courseId}`),
+        fetch('/api/enrollment'),
+      ])
+
+      if (coursesRes.ok) {
+        const data = await coursesRes.json()
+        if (Array.isArray(data)) {
+          const found = (data as Course[]).find((c) => c.id === courseId) ?? null
+          setCourse(found)
+          if (!found) setError(t('notFound'))
+        }
+      } else {
+        setError(t('notFound'))
+      }
+
+      if (catsRes.ok) {
+        const cats: Category[] = await catsRes.json()
+        setCategories(Array.isArray(cats) ? cats : [])
+      }
+
+      if (lessonsRes.ok) {
+        const data = await lessonsRes.json()
+        const raw: unknown = Array.isArray(data)
+          ? data
+          : Array.isArray((data as { content?: unknown })?.content)
+            ? (data as { content: unknown[] }).content
+            : Array.isArray((data as { data?: unknown })?.data)
+              ? (data as { data: unknown[] }).data
+              : []
+        const list = raw as Lesson[]
+        const tagged = list.filter((l) => lessonCourseId(l) !== undefined)
+        const scoped =
+          tagged.length > 0
+            ? tagged.filter((l) => lessonCourseId(l) === courseId)
+            : list
+        const sorted = [...scoped].sort((a, b) => a.sequence - b.sequence)
+        setLessons(sorted)
+        const first = sorted[0]
+        if (first) setActiveLessonId((prev) => prev ?? first.id)
+      }
+
+      if (enrolRes.ok) {
+        const en: Enrollment[] = await enrolRes.json()
+        setEnrolled(
+          Array.isArray(en) && en.some((e) => e.courseId === courseId)
+        )
+      }
+    } catch {
+      setError(t('notFound'))
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function handleEnroll() {
+    if (!courseId) return
+    setEnrolling(true)
+    try {
+      const res = await fetch('/api/enrollment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ courseId }),
+      })
+      if (res.ok) setEnrolled(true)
+    } finally {
+      setEnrolling(false)
+    }
+  }
+
+  function toggleDone(lessonId: number) {
+    setDoneLessonIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(lessonId)) next.delete(lessonId)
+      else next.add(lessonId)
+      return next
+    })
+  }
+
+  const activeLesson = useMemo(
+    () => lessons.find((l) => l.id === activeLessonId) ?? lessons[0] ?? null,
+    [lessons, activeLessonId]
+  )
+
+  const doneCount = useMemo(
+    () => lessons.filter((l) => doneLessonIds.has(l.id)).length,
+    [lessons, doneLessonIds]
+  )
+  const completionPct = lessons.length === 0 ? 0 : Math.round((doneCount / lessons.length) * 100)
+  const remainingDuration = useMemo(
+    () =>
+      lessons
+        .filter((l) => !doneLessonIds.has(l.id))
+        .reduce((sum, l) => sum + (l.durationMinutes ?? 0), 0),
+    [lessons, doneLessonIds]
+  )
+
+  const totalDuration = useMemo(
+    () => lessons.reduce((sum, l) => sum + (l.durationMinutes ?? 0), 0),
+    [lessons]
+  )
+
+  if (loading && !course) {
+    return (
+      <DashboardLayout>
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+          <CircularProgress />
+        </Box>
+      </DashboardLayout>
+    )
+  }
+
+  if (!course) {
+    return (
+      <DashboardLayout>
+        <Box sx={{ p: { xs: 2, md: 3 } }}>
+          <Alert severity="error">{error || t('notFound')}</Alert>
+        </Box>
+      </DashboardLayout>
+    )
+  }
 
   return (
     <DashboardLayout>
@@ -84,28 +213,74 @@ export default function CourseDetail() {
           </Box>
           <Typography variant="h4" sx={{ fontSize: { xs: '1rem', md: '1.25rem' } }} noWrap>{course.title}</Typography>
         </Box>
-        <Button variant="contained" color="primary" size="small" sx={{ flexShrink: 0 }} onClick={() => router.push(`/quiz/${course.id}`)}>{t('takeQuiz')}</Button>
+        {enrolled ? (
+          <Button variant="contained" color="primary" size="small" sx={{ flexShrink: 0 }} onClick={() => router.push(`/quiz/${course.id}`)}>{t('takeQuiz')}</Button>
+        ) : (
+          <Button variant="contained" color="primary" size="small" sx={{ flexShrink: 0 }} disabled={enrolling} onClick={handleEnroll}>
+            {enrolling ? <CircularProgress size={16} color="inherit" /> : tcourses('enroll')}
+          </Button>
+        )}
       </Box>
 
       <Box sx={{ p: { xs: 2, md: 3 } }}>
         <Grid container spacing={2} alignItems="flex-start">
           <Grid item xs={12} md={8}>
             <Card sx={{ mb: 2, overflow: 'hidden' }}>
-              <Box sx={{ height: { xs: 200, md: 280 }, bgcolor: 'secondary.main', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 1.5, position: 'relative', background: 'linear-gradient(135deg, #1a1a2e 0%, #2d3a5e 100%)' }}>
-                <Box sx={{ position: 'absolute', top: -40, right: -40, width: 200, height: 200, bgcolor: 'primary.main', opacity: 0.1, borderRadius: '50%' }} />
-                <Box sx={{ width: 60, height: 60, borderRadius: '50%', bgcolor: 'rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'background 0.2s', '&:hover': { bgcolor: 'primary.main' } }}>
-                  <PlayCircleOutlineIcon sx={{ fontSize: 28, color: '#fff' }} />
+              <LessonPlayer lesson={activeLesson} takeQuizLabel={t('takeQuiz')} onTakeQuiz={() => router.push(`/quiz/${courseId}`)} />
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 2, py: 1.25, bgcolor: '#111827', flexWrap: 'wrap' }}>
+                <Button
+                  size="small"
+                  sx={{ color: 'rgba(255,255,255,0.6)', borderColor: 'rgba(255,255,255,0.2)' }}
+                  variant="outlined"
+                  disabled={!activeLesson || lessons.findIndex((l) => l.id === activeLesson.id) <= 0}
+                  onClick={() => {
+                    if (!activeLesson) return
+                    const idx = lessons.findIndex((l) => l.id === activeLesson.id)
+                    const prev = idx > 0 ? lessons[idx - 1] : null
+                    if (prev) setActiveLessonId(prev.id)
+                  }}
+                >
+                  {t('prevLesson')}
+                </Button>
+                <Box sx={{ flex: 1, px: 1, color: 'rgba(255,255,255,0.7)', fontSize: '0.78rem', textAlign: 'center', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {activeLesson?.title ?? ''}
                 </Box>
-                <Typography sx={{ color: 'rgba(255,255,255,0.9)', fontWeight: 500 }}>User Interview Techniques</Typography>
-                <Typography sx={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.78rem' }}>35 min · Module 3</Typography>
-              </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 2, py: 1.25, bgcolor: '#111827' }}>
-                <Button size="small" sx={{ color: 'rgba(255,255,255,0.6)', borderColor: 'rgba(255,255,255,0.2)' }} variant="outlined">{t('prevLesson')}</Button>
-                <Box sx={{ flex: 1, px: 1 }}>
-                  <LinearProgress variant="determinate" value={35} sx={{ height: 4, bgcolor: 'rgba(255,255,255,0.2)', '& .MuiLinearProgress-bar': { bgcolor: '#fff' } }} />
-                </Box>
-                <Typography sx={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)', whiteSpace: 'nowrap' }}>12:30 / 35:00</Typography>
-                <Button size="small" variant="contained" color="primary">{t('nextLesson')}</Button>
+                {activeLesson && (
+                  doneLessonIds.has(activeLesson.id) ? (
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      startIcon={<CheckCircleIcon />}
+                      onClick={() => toggleDone(activeLesson.id)}
+                      sx={{ color: '#7cd1a8', borderColor: 'rgba(124,209,168,0.4)', '&:hover': { borderColor: '#7cd1a8', bgcolor: 'rgba(124,209,168,0.08)' } }}
+                    >
+                      {t('completedLesson')}
+                    </Button>
+                  ) : (
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      onClick={() => toggleDone(activeLesson.id)}
+                      sx={{ color: '#fff', borderColor: 'rgba(255,255,255,0.4)', '&:hover': { borderColor: '#fff', bgcolor: 'rgba(255,255,255,0.05)' } }}
+                    >
+                      {t('markAsDone')}
+                    </Button>
+                  )
+                )}
+                <Button
+                  size="small"
+                  variant="contained"
+                  color="primary"
+                  disabled={!activeLesson || lessons.findIndex((l) => l.id === activeLesson.id) >= lessons.length - 1}
+                  onClick={() => {
+                    if (!activeLesson) return
+                    const idx = lessons.findIndex((l) => l.id === activeLesson.id)
+                    const next = idx >= 0 && idx < lessons.length - 1 ? lessons[idx + 1] : null
+                    if (next) setActiveLessonId(next.id)
+                  }}
+                >
+                  {t('nextLesson')}
+                </Button>
               </Box>
             </Card>
 
@@ -116,49 +291,99 @@ export default function CourseDetail() {
             {activeTab === 0 && (
               <Card><CardContent>
                 <Typography variant="h5" sx={{ mb: 1 }}>{course.title}</Typography>
-                <Typography sx={{ color: 'text.secondary', lineHeight: 1.75, mb: 2 }}>{course.description}</Typography>
-                <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap', mb: 2 }}>
-                  {course.tags.map(tag => <Chip key={tag} label={tag} size="small" variant="outlined" />)}
-                </Box>
-                <Box sx={{ display: 'flex', gap: 3, mb: 2 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                    <StarRateRoundedIcon sx={{ fontSize: 16, color: '#c8a96e' }} />
-                    <Typography variant="body2" sx={{ fontWeight: 600, color: '#c8a96e' }}>{course.rating}</Typography>
-                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>({course.reviews} {tc('reviews')})</Typography>
+                {course.description && (
+                  <Typography sx={{ color: 'text.secondary', lineHeight: 1.75, mb: 2 }}>{course.description}</Typography>
+                )}
+                {course.tags && course.tags.length > 0 && (
+                  <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap', mb: 2 }}>
+                    {course.tags.map((tag) => <Chip key={tag} label={tag} size="small" variant="outlined" />)}
                   </Box>
-                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>{course.students.toLocaleString()} {tc('students')}</Typography>
-                  <Chip label={course.level} size="small" sx={{ bgcolor: '#e1f2ef', color: '#1f6257' }} />
-                </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, bgcolor: 'background.default', borderRadius: 2, p: 1.5 }}>
-                  <Avatar sx={{ bgcolor: course.instructorColor, fontWeight: 600, fontSize: '0.82rem' }}>{course.instructorInitials}</Avatar>
-                  <Box>
-                    <Typography variant="subtitle2">{course.instructor}</Typography>
-                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>Principal UX Researcher · Google · Author of &ldquo;Research That Ships&rdquo;</Typography>
-                  </Box>
+                )}
+                <Box sx={{ display: 'flex', gap: 3, mb: 2, flexWrap: 'wrap' }}>
+                  {course.category && (
+                    <Chip label={categoryLabel(course.category, categories)} size="small" sx={{ bgcolor: '#e1f2ef', color: '#1f6257' }} />
+                  )}
+                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                    {tl('lessons', { count: lessons.length })}
+                  </Typography>
+                  {totalDuration > 0 && (
+                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                      {tl('duration', { minutes: totalDuration })}
+                    </Typography>
+                  )}
                 </Box>
               </CardContent></Card>
             )}
 
             {activeTab === 1 && (
-              <Box>
-                {MODULES.map((mod, mi) => (
-                  <Accordion key={mi} defaultExpanded={mi < 2} disableGutters sx={{ mb: 0.75, border: '1px solid', borderColor: 'divider', '&:before': { display: 'none' }, borderRadius: '8px !important', overflow: 'hidden' }}>
-                    <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ bgcolor: mod.active ? 'primary.light' : 'background.paper' }}>
-                      <Typography variant="subtitle2">{t('module', { num: mi + 1 })}: {mod.title}</Typography>
-                      <Typography variant="caption" sx={{ color: 'text.secondary', ml: 'auto', mr: 2 }}>{mod.lessons.length} {tc('lessons')}</Typography>
-                    </AccordionSummary>
-                    <AccordionDetails sx={{ p: 0 }}>
-                      {mod.lessons.map((l, li) => (
-                        <Box key={li} sx={{ display: 'flex', alignItems: 'center', gap: 1.25, px: 2, py: 1, borderTop: '1px solid', borderColor: 'divider', bgcolor: l.current ? 'primary.light' : 'transparent', cursor: 'pointer', '&:hover': { bgcolor: 'background.default' } }}>
-                          {l.done ? <CheckCircleIcon sx={{ fontSize: 16, color: 'primary.main', flexShrink: 0 }} /> : l.current ? <PlayCircleOutlineIcon sx={{ fontSize: 16, color: 'primary.main', flexShrink: 0 }} /> : <RadioButtonUncheckedIcon sx={{ fontSize: 16, color: 'text.disabled', flexShrink: 0 }} />}
-                          <Typography variant="body2" sx={{ flex: 1, color: l.current ? 'primary.dark' : l.done ? 'text.secondary' : 'text.primary', fontWeight: l.current ? 500 : 400 }}>{l.title}</Typography>
-                          <Typography variant="caption" sx={{ color: 'text.disabled' }}>{l.duration}</Typography>
+              <Card>
+                <CardContent sx={{ p: 0, '&:last-child': { pb: 0 } }}>
+                  {lessons.length === 0 ? (
+                    <Box sx={{ textAlign: 'center', py: 6, px: 2 }}>
+                      <Typography sx={{ fontSize: '2rem', mb: 1 }}>📖</Typography>
+                      <Typography variant="body1" sx={{ color: 'text.secondary' }}>{tl('empty')}</Typography>
+                    </Box>
+                  ) : (
+                    lessons.map((l, i) => {
+                      const isActive = activeLesson?.id === l.id
+                      const isDone = doneLessonIds.has(l.id)
+                      const TypeIcon =
+                        l.contentType === 'VIDEO'
+                          ? OndemandVideoOutlinedIcon
+                          : l.contentType === 'QUIZ'
+                            ? QuizOutlinedIcon
+                            : ArticleOutlinedIcon
+                      return (
+                        <Box
+                          key={l.id}
+                          onClick={() => setActiveLessonId(l.id)}
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 1.25,
+                            px: 2,
+                            py: 1.25,
+                            borderTop: i === 0 ? 'none' : '1px solid',
+                            borderColor: 'divider',
+                            bgcolor: isActive ? 'primary.light' : 'transparent',
+                            cursor: 'pointer',
+                            '&:hover': { bgcolor: isActive ? 'primary.light' : 'background.default' },
+                          }}
+                        >
+                          {isDone ? (
+                            <CheckCircleIcon sx={{ fontSize: 18, color: 'primary.main', flexShrink: 0 }} />
+                          ) : isActive ? (
+                            <PlayCircleOutlineIcon sx={{ fontSize: 18, color: 'primary.main', flexShrink: 0 }} />
+                          ) : (
+                            <RadioButtonUncheckedIcon sx={{ fontSize: 18, color: 'text.disabled', flexShrink: 0 }} />
+                          )}
+                          <Chip
+                            label={tl('sequenceShort', { num: l.sequence })}
+                            size="small"
+                            sx={{ height: 20, fontSize: '0.62rem', flexShrink: 0 }}
+                          />
+                          <Box sx={{ flex: 1, minWidth: 0 }}>
+                            <Typography variant="body2" sx={{ fontWeight: isActive ? 600 : 400, color: isActive ? 'primary.dark' : 'text.primary', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              {l.title}
+                            </Typography>
+                            {l.description && (
+                              <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                {l.description}
+                              </Typography>
+                            )}
+                          </Box>
+                          <TypeIcon sx={{ fontSize: 16, color: 'text.disabled', flexShrink: 0 }} />
+                          {l.durationMinutes ? (
+                            <Typography variant="caption" sx={{ color: 'text.disabled', flexShrink: 0 }}>
+                              {tl('duration', { minutes: l.durationMinutes })}
+                            </Typography>
+                          ) : null}
                         </Box>
-                      ))}
-                    </AccordionDetails>
-                  </Accordion>
-                ))}
-              </Box>
+                      )
+                    })
+                  )}
+                </CardContent>
+              </Card>
             )}
 
             {activeTab === 2 && (
@@ -207,11 +432,15 @@ export default function CourseDetail() {
               <Typography variant="subtitle2" sx={{ mb: 1.5 }}>{t('yourProgress')}</Typography>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
                 <Typography variant="caption" sx={{ color: 'text.secondary' }}>{t('overallCompletion')}</Typography>
-                <Typography variant="caption" sx={{ fontWeight: 600 }}>{course.progress}%</Typography>
+                <Typography variant="caption" sx={{ fontWeight: 600 }}>{completionPct}%</Typography>
               </Box>
-              <LinearProgress variant="determinate" value={course.progress} sx={{ mb: 2 }} color="primary" />
+              <LinearProgress variant="determinate" value={completionPct} sx={{ mb: 2 }} color="primary" />
               <Grid container spacing={1} sx={{ mb: 2 }}>
-                {[{ n: course.progress > 0 ? Math.round(course.totalModules * course.progress / 100) : 0, l: t('lessonsDone') }, { n: course.lessons, l: t('total') }, { n: `${Math.round(course.hours * (1 - course.progress / 100) * 10) / 10}h`, l: t('remaining') }].map(s => (
+                {[
+                  { n: doneCount, l: t('lessonsDone') },
+                  { n: lessons.length, l: t('total') },
+                  { n: remainingDuration > 0 ? tl('duration', { minutes: remainingDuration }) : '—', l: t('remaining') },
+                ].map((s) => (
                   <Grid item xs={4} key={s.l}>
                     <Box sx={{ bgcolor: 'background.default', borderRadius: 1.5, p: 1, textAlign: 'center' }}>
                       <Typography sx={{ fontFamily: 'var(--font-serif), serif', fontSize: '1.25rem' }}>{s.n}</Typography>
@@ -224,21 +453,157 @@ export default function CourseDetail() {
             </CardContent></Card>
 
             <Card><CardContent>
-              <Typography variant="subtitle2" sx={{ mb: 1.5 }}>{t('courseModules')}</Typography>
-              {MODULES.map((mod, mi) => (
-                <Box key={mi} sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 0.75, borderBottom: mi < MODULES.length - 1 ? '1px solid' : 'none', borderColor: 'divider' }}>
-                  <Box sx={{ width: 10, height: 10, borderRadius: '50%', flexShrink: 0, bgcolor: mod.done ? 'primary.main' : mod.active ? 'transparent' : 'divider', border: mod.active ? '2px solid' : 'none', borderColor: mod.active ? 'primary.main' : 'transparent', boxShadow: mod.active ? '0 0 0 3px #e1f2ef' : 'none' }} />
-                  <Box sx={{ flex: 1 }}>
-                    <Typography variant="body2" sx={{ fontSize: '0.82rem', fontWeight: mod.active ? 600 : 400, color: mod.active ? 'primary.dark' : 'text.primary' }}>{mod.title}</Typography>
-                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>{mod.lessons.length} {tc('lessons')}</Typography>
-                  </Box>
-                  {mod.done && <Typography sx={{ fontSize: '0.78rem', color: 'primary.main' }}>✓</Typography>}
-                </Box>
-              ))}
+              <Typography variant="subtitle2" sx={{ mb: 1.5 }}>{tl('title')}</Typography>
+              {lessons.length === 0 ? (
+                <Typography variant="caption" sx={{ color: 'text.secondary' }}>{tl('empty')}</Typography>
+              ) : (
+                lessons.map((l, i) => {
+                  const isActive = activeLesson?.id === l.id
+                  const isDone = doneLessonIds.has(l.id)
+                  return (
+                    <Box
+                      key={l.id}
+                      onClick={() => setActiveLessonId(l.id)}
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1,
+                        py: 0.75,
+                        borderBottom: i < lessons.length - 1 ? '1px solid' : 'none',
+                        borderColor: 'divider',
+                        cursor: 'pointer',
+                        '&:hover .lesson-title': { color: 'primary.main' },
+                      }}
+                    >
+                      {isDone ? (
+                        <CheckCircleIcon sx={{ fontSize: 14, color: 'primary.main', flexShrink: 0 }} />
+                      ) : (
+                        <Box
+                          sx={{
+                            width: 10,
+                            height: 10,
+                            borderRadius: '50%',
+                            flexShrink: 0,
+                            bgcolor: isActive ? 'transparent' : 'divider',
+                            border: isActive ? '2px solid' : 'none',
+                            borderColor: isActive ? 'primary.main' : 'transparent',
+                            boxShadow: isActive ? '0 0 0 3px #e1f2ef' : 'none',
+                          }}
+                        />
+                      )}
+                      <Box sx={{ flex: 1, minWidth: 0 }}>
+                        <Typography
+                          className="lesson-title"
+                          variant="body2"
+                          sx={{
+                            fontSize: '0.82rem',
+                            fontWeight: isActive ? 600 : 400,
+                            color: isActive ? 'primary.dark' : 'text.primary',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          {l.title}
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                          {l.contentType === 'VIDEO'
+                            ? tl('contentTypeVideo')
+                            : l.contentType === 'QUIZ'
+                              ? tl('contentTypeQuiz')
+                              : tl('contentTypeText')}
+                          {l.durationMinutes ? ` · ${tl('duration', { minutes: l.durationMinutes })}` : ''}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  )
+                })
+              )}
             </CardContent></Card>
           </Grid>
         </Grid>
       </Box>
     </DashboardLayout>
+  )
+}
+
+function LessonPlayer({
+  lesson,
+  takeQuizLabel,
+  onTakeQuiz,
+}: {
+  lesson: Lesson | null
+  takeQuizLabel: string
+  onTakeQuiz: () => void
+}) {
+  if (!lesson) {
+    return (
+      <Box sx={{ height: { xs: 200, md: 280 }, bgcolor: 'secondary.main', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #1a1a2e 0%, #2d3a5e 100%)' }}>
+        <Typography sx={{ color: 'rgba(255,255,255,0.6)' }}>—</Typography>
+      </Box>
+    )
+  }
+
+  if (lesson.contentType === 'QUIZ') {
+    return (
+      <Box sx={{ height: { xs: 220, md: 300 }, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 1.5, p: 3, background: 'linear-gradient(135deg, #1a1a2e 0%, #2d3a5e 100%)', textAlign: 'center' }}>
+        <Typography sx={{ fontSize: '2.5rem' }}>📝</Typography>
+        <Typography sx={{ color: '#fff', fontWeight: 600, fontSize: '1.1rem' }}>{lesson.title}</Typography>
+        {lesson.description && (
+          <Typography sx={{ color: 'rgba(255,255,255,0.7)', maxWidth: 480 }}>{lesson.description}</Typography>
+        )}
+        <Button variant="contained" color="primary" onClick={onTakeQuiz} sx={{ mt: 1 }}>
+          {takeQuizLabel}
+        </Button>
+      </Box>
+    )
+  }
+
+  if (lesson.contentType === 'VIDEO') {
+    const youTubeId = extractYouTubeId(lesson.content || '')
+    if (youTubeId) {
+      return (
+        <Box sx={{ position: 'relative', width: '100%', pb: '56.25%', bgcolor: '#000' }}>
+          <Box
+            component="iframe"
+            src={`https://www.youtube.com/embed/${youTubeId}`}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            sx={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 0 }}
+          />
+        </Box>
+      )
+    }
+    return (
+      <Box sx={{ height: { xs: 200, md: 280 }, bgcolor: 'secondary.main', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 1.5, background: 'linear-gradient(135deg, #1a1a2e 0%, #2d3a5e 100%)' }}>
+        <Typography sx={{ color: 'rgba(255,255,255,0.9)', fontWeight: 500 }}>{lesson.title}</Typography>
+        <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.78rem' }}>Video unavailable</Typography>
+      </Box>
+    )
+  }
+
+  return (
+    <Box sx={{ p: { xs: 2, md: 3 }, bgcolor: 'background.paper' }}>
+      <Typography variant="h6" sx={{ mb: 1.5 }}>{lesson.title}</Typography>
+      {lesson.description && (
+        <Typography sx={{ color: 'text.secondary', mb: 2 }}>{lesson.description}</Typography>
+      )}
+      <Box
+        sx={{
+          color: 'text.primary',
+          lineHeight: 1.75,
+          '& p': { my: 1 },
+          '& ul, & ol': { pl: 3, my: 1 },
+          '& a': { color: 'primary.main' },
+          '& code': { bgcolor: 'background.default', px: 0.5, borderRadius: 0.5, fontSize: '0.85em' },
+          '& pre': { bgcolor: 'background.default', p: 1.5, borderRadius: 1, overflowX: 'auto' },
+          '& blockquote': { borderLeft: '3px solid', borderColor: 'divider', pl: 2, color: 'text.secondary', my: 1 },
+          '& img': { display: 'block', maxWidth: '100%', height: 'auto', borderRadius: 1, my: 1.5, mx: 'auto' },
+          '& figure': { m: 0, my: 1.5 },
+          '& iframe, & video': { display: 'block', maxWidth: '100%', borderRadius: 1, my: 1.5 },
+        }}
+        dangerouslySetInnerHTML={{ __html: lesson.content || '' }}
+      />
+    </Box>
   )
 }

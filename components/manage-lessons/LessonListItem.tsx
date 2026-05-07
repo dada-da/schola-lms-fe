@@ -10,6 +10,7 @@ import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
 import OndemandVideoOutlinedIcon from '@mui/icons-material/OndemandVideoOutlined'
 import ArticleOutlinedIcon from '@mui/icons-material/ArticleOutlined'
+import QuizOutlinedIcon from '@mui/icons-material/QuizOutlined'
 import type { Lesson } from './types'
 
 interface Props {
@@ -21,6 +22,13 @@ interface Props {
 export default function LessonListItem({ lesson, onEdit, onDelete }: Props) {
   const t = useTranslations('manageLessons')
   const isVideo = lesson.contentType === 'VIDEO'
+  const isQuiz = lesson.contentType === 'QUIZ'
+  const typeLabel = isVideo
+    ? t('contentTypeVideo')
+    : isQuiz
+      ? t('contentTypeQuiz')
+      : t('contentTypeText')
+  const TypeIcon = isVideo ? OndemandVideoOutlinedIcon : isQuiz ? QuizOutlinedIcon : ArticleOutlinedIcon
 
   return (
     <Card>
@@ -46,7 +54,7 @@ export default function LessonListItem({ lesson, onEdit, onDelete }: Props) {
             flexShrink: 0,
           }}
         >
-          {isVideo ? <OndemandVideoOutlinedIcon /> : <ArticleOutlinedIcon />}
+          <TypeIcon />
         </Box>
 
         <Box sx={{ flex: 1, minWidth: 0 }}>
@@ -89,7 +97,7 @@ export default function LessonListItem({ lesson, onEdit, onDelete }: Props) {
             variant="caption"
             sx={{ color: 'text.disabled', display: 'block', mt: 0.75 }}
           >
-            {isVideo ? t('contentTypeVideo') : t('contentTypeText')}
+            {typeLabel}
             {lesson.durationMinutes
               ? ` · ${t('duration', { minutes: lesson.durationMinutes })}`
               : ''}

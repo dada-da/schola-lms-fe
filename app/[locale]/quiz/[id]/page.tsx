@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { useRouter } from '@/i18n/navigation'
@@ -34,23 +34,14 @@ export default function QuizPage() {
   const [phase, setPhase] = useState<'intro' | 'quiz' | 'results'>('intro')
   const [currentQ, setCurrentQ] = useState(0)
   const [answers, setAnswers] = useState<Record<number, any>>({})
-  const [timeLeft, setTimeLeft] = useState(15 * 60)
-  const [startTime, setStartTime] = useState(0)
 
-  useEffect(() => {
-    if (phase !== 'quiz') return
-    const timer = setInterval(() => setTimeLeft(s => { if (s <= 1) { clearInterval(timer); setPhase('results'); return 0 } return s - 1 }), 1000)
-    return () => clearInterval(timer)
-  }, [phase])
-
-  const fmt = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`
   const answeredCount = Object.keys(answers).length
   const score = Math.round(QUESTIONS.filter((q, i) => q.correct !== null && answers[i] === q.correct).length / QUESTIONS.filter(q => q.correct !== null).length * 100)
   const passed = score >= 70
   const q = QUESTIONS[currentQ]!
 
-  const start = () => { setPhase('quiz'); setStartTime(Date.now()) }
-  const reset = () => { setAnswers({}); setCurrentQ(0); setTimeLeft(15 * 60); setPhase('intro') }
+  const start = () => { setPhase('quiz') }
+  const reset = () => { setAnswers({}); setCurrentQ(0); setPhase('intro') }
 
   if (phase === 'intro') {return (
     <DashboardLayout>
@@ -63,8 +54,8 @@ export default function QuizPage() {
             {t('description')}
           </Typography>
           <Grid container spacing={1.5} sx={{ mb: 3 }}>
-            {[{ n: QUESTIONS.length, l: tc('questions') }, { n: 15, l: tc('minutes') }, { n: '70%', l: tc('passMark') }].map(s => (
-              <Grid item xs={4} key={s.l}>
+            {[{ n: QUESTIONS.length, l: tc('questions') }, { n: '70%', l: tc('passMark') }].map(s => (
+              <Grid item xs={6} key={s.l}>
                 <Box sx={{ bgcolor: 'background.default', borderRadius: 2, py: 1.5 }}>
                   <Typography sx={{ fontFamily: 'var(--font-serif), serif', fontSize: '1.6rem' }}>{s.n}</Typography>
                   <Typography variant="caption" sx={{ color: 'text.secondary' }}>{s.l}</Typography>
@@ -95,9 +86,8 @@ export default function QuizPage() {
             {[
               { n: QUESTIONS.filter((q, i) => q.correct !== null && answers[i] === q.correct).length, l: tc('correct'), color: '#e1f2ef', textColor: '#1f6257' },
               { n: QUESTIONS.filter(q => q.correct !== null).length - QUESTIONS.filter((q, i) => q.correct !== null && answers[i] === q.correct).length, l: tc('incorrect'), color: '#faeaec', textColor: '#8a3040' },
-              { n: fmt(15 * 60 - timeLeft), l: tc('timeTaken'), color: '#e8f0fa', textColor: '#1d4f7a' },
             ].map(s => (
-              <Grid item xs={4} key={s.l}>
+              <Grid item xs={6} key={s.l}>
                 <Box sx={{ bgcolor: s.color, borderRadius: 2, py: 1.5 }}>
                   <Typography sx={{ fontFamily: 'var(--font-serif), serif', fontSize: '1.6rem', color: s.textColor }}>{s.n}</Typography>
                   <Typography variant="caption" sx={{ color: s.textColor, opacity: 0.7 }}>{s.l}</Typography>
@@ -120,11 +110,6 @@ export default function QuizPage() {
         <Typography variant="body2" sx={{ color: 'text.secondary', flexShrink: 0, display: { xs: 'none', sm: 'block' } }}>{t('title')}</Typography>
         <LinearProgress variant="determinate" value={((currentQ + 1) / QUESTIONS.length) * 100} sx={{ flex: 1 }} color="primary" />
         <Typography variant="caption" sx={{ color: 'text.secondary', flexShrink: 0 }}>{currentQ + 1} / {QUESTIONS.length}</Typography>
-        <Chip
-          label={`⏱ ${fmt(timeLeft)}`}
-          size="small"
-          sx={{ bgcolor: timeLeft < 60 ? '#faeaec' : 'background.default', color: timeLeft < 60 ? '#8a3040' : 'text.primary', fontWeight: 600, flexShrink: 0 }}
-        />
       </Box>
 
       <Box sx={{ p: { xs: 2, md: 3 }, maxWidth: 960, mx: 'auto' }}>
