@@ -47,3 +47,16 @@ export function categoryLabel(c: Category | string | null | undefined, all: Cate
   const match = all.find((x) => x.name === c)
   return match?.displayName ?? c
 }
+
+export type EnrollmentStatus = 'IN_PROGRESS' | 'COMPLETED'
+
+export interface Enrollment {
+  id: number
+  studentId: number
+  studentEmail: string
+  courseId: number
+  courseTitle: string
+  status: EnrollmentStatus | string
+  enrolledAt: string
+  completedAt: string | null
+}

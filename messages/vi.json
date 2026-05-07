@@ -169,7 +169,14 @@
     "coursesFoundIn": "{count} khóa học trong {category}",
     "noCoursesFound": "Không tìm thấy khóa học",
     "noCoursesHint": "Thử điều chỉnh tìm kiếm hoặc bộ lọc",
-    "continueLearning": "Tiếp tục học"
+    "continueLearning": "Tiếp tục học",
+    "continueLearningBtn": "Tiếp tục",
+    "enroll": "Ghi danh",
+    "enrolling": "Đang ghi danh…",
+    "enrolled": "Đã ghi danh",
+    "enrolledToast": "Đã ghi danh vào \"{title}\"",
+    "enrollFailed": "Không thể ghi danh. Vui lòng thử lại.",
+    "loadFailed": "Không tải được khóa học"
   },
   "browse": {
     "eyebrow": "Danh mục khóa học",

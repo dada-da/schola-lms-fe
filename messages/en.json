@@ -169,7 +169,14 @@
     "coursesFoundIn": "{count} course(s) found in {category}",
     "noCoursesFound": "No courses found",
     "noCoursesHint": "Try adjusting your search or filters",
-    "continueLearning": "Continue learning"
+    "continueLearning": "Continue learning",
+    "continueLearningBtn": "Continue",
+    "enroll": "Enroll",
+    "enrolling": "Enrolling…",
+    "enrolled": "Enrolled",
+    "enrolledToast": "Enrolled in \"{title}\"",
+    "enrollFailed": "Could not enroll. Please try again.",
+    "loadFailed": "Failed to load courses"
   },
   "browse": {
     "eyebrow": "Course catalogue",
