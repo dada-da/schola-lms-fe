@@ -4,10 +4,8 @@ import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
 import Typography from '@mui/material/Typography'
-import Button from '@mui/material/Button'
 import Grid from '@mui/material/Grid'
 import LinearProgress from '@mui/material/LinearProgress'
-import Alert from '@mui/material/Alert'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import type { Lesson } from '@/components/manage-lessons/types'
 
@@ -18,9 +16,7 @@ interface Props {
   doneCount: number
   completionPct: number
   remainingDuration: number
-  quizError: string
   onSelectLesson: (id: number) => void
-  onTakeQuiz: () => void
 }
 
 export default function CourseSidebar({
@@ -30,9 +26,7 @@ export default function CourseSidebar({
   doneCount,
   completionPct,
   remainingDuration,
-  quizError,
   onSelectLesson,
-  onTakeQuiz,
 }: Props) {
   const t = useTranslations('courseDetail')
   const tl = useTranslations('manageLessons')
@@ -60,10 +54,6 @@ export default function CourseSidebar({
             </Grid>
           ))}
         </Grid>
-        <Button fullWidth variant="contained" color="primary" onClick={onTakeQuiz}>
-          {t('takeModuleQuiz')}
-        </Button>
-        {quizError && <Alert severity="warning" sx={{ mt: 1 }}>{quizError}</Alert>}
       </CardContent></Card>
 
       <Card><CardContent>

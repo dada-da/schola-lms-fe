@@ -11,10 +11,9 @@ interface Props {
   enrolled: boolean
   enrolling: boolean
   onEnroll: () => void
-  onTakeQuiz: () => void
 }
 
-export default function CourseHeader({ title, enrolled, enrolling, onEnroll, onTakeQuiz }: Props) {
+export default function CourseHeader({ title, enrolled, enrolling, onEnroll }: Props) {
   const router = useRouter()
   const t = useTranslations('courseDetail')
   const tcourses = useTranslations('courses')
@@ -31,11 +30,7 @@ export default function CourseHeader({ title, enrolled, enrolling, onEnroll, onT
         </Box>
         <Typography variant="h4" sx={{ fontSize: { xs: '1rem', md: '1.25rem' } }} noWrap>{title}</Typography>
       </Box>
-      {enrolled ? (
-        <Button variant="contained" color="primary" size="small" sx={{ flexShrink: 0 }} onClick={onTakeQuiz}>
-          {t('takeQuiz')}
-        </Button>
-      ) : (
+      {!enrolled && (
         <Button variant="contained" color="primary" size="small" sx={{ flexShrink: 0 }} disabled={enrolling} onClick={onEnroll}>
           {enrolling ? <CircularProgress size={16} color="inherit" /> : tcourses('enroll')}
         </Button>

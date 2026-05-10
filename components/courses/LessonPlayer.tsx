@@ -7,6 +7,7 @@ import Button from '@mui/material/Button'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import { extractYouTubeId, type Lesson } from '@/components/manage-lessons/types'
 import LessonTextContent from './LessonTextContent'
+import LessonQuizContent from './LessonQuizContent'
 
 interface Props {
   lesson: Lesson | null
@@ -14,7 +15,6 @@ interface Props {
   doneLessonIds: Set<number>
   onSelectLesson: (id: number) => void
   onToggleDone: (id: number) => void
-  onTakeQuiz: () => void
 }
 
 export default function LessonPlayer({
@@ -23,7 +23,6 @@ export default function LessonPlayer({
   doneLessonIds,
   onSelectLesson,
   onToggleDone,
-  onTakeQuiz,
 }: Props) {
   const t = useTranslations('courseDetail')
   const idx = lesson ? lessons.findIndex((l) => l.id === lesson.id) : -1
@@ -32,7 +31,7 @@ export default function LessonPlayer({
 
   return (
     <Card sx={{ mb: 2, overflow: 'hidden' }}>
-      <PlayerSurface lesson={lesson} onTakeQuiz={onTakeQuiz} takeQuizLabel={t('takeQuiz')} />
+      <PlayerSurface lesson={lesson} />
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 2, py: 1.25, bgcolor: '#111827', flexWrap: 'wrap' }}>
         <Button
           size="small"
@@ -88,15 +87,7 @@ export default function LessonPlayer({
   )
 }
 
-function PlayerSurface({
-  lesson,
-  takeQuizLabel,
-  onTakeQuiz,
-}: {
-  lesson: Lesson | null
-  takeQuizLabel: string
-  onTakeQuiz: () => void
-}) {
+function PlayerSurface({ lesson }: { lesson: Lesson | null }) {
   if (!lesson) {
     return (
       <Box sx={{ height: { xs: 200, md: 280 }, bgcolor: 'secondary.main', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #1a1a2e 0%, #2d3a5e 100%)' }}>
@@ -106,18 +97,7 @@ function PlayerSurface({
   }
 
   if (lesson.contentType === 'QUIZ') {
-    return (
-      <Box sx={{ height: { xs: 220, md: 300 }, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 1.5, p: 3, background: 'linear-gradient(135deg, #1a1a2e 0%, #2d3a5e 100%)', textAlign: 'center' }}>
-        <Typography sx={{ fontSize: '2.5rem' }}>📝</Typography>
-        <Typography sx={{ color: '#fff', fontWeight: 600, fontSize: '1.1rem' }}>{lesson.title}</Typography>
-        {lesson.description && (
-          <Typography sx={{ color: 'rgba(255,255,255,0.7)', maxWidth: 480 }}>{lesson.description}</Typography>
-        )}
-        <Button variant="contained" color="primary" onClick={onTakeQuiz} sx={{ mt: 1 }}>
-          {takeQuizLabel}
-        </Button>
-      </Box>
-    )
+    return <LessonQuizContent lesson={lesson} />
   }
 
   if (lesson.contentType === 'VIDEO') {

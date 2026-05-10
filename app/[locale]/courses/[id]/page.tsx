@@ -2,7 +2,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { useRouter } from '@/i18n/navigation'
 import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
 import CircularProgress from '@mui/material/CircularProgress'
@@ -20,7 +19,6 @@ import type {
 import { lessonCourseId, type Lesson } from '@/components/manage-lessons/types'
 
 export default function CourseDetail() {
-  const router = useRouter()
   const params = useParams<{ id: string }>()
   const t = useTranslations('courseDetail')
 
@@ -35,7 +33,6 @@ export default function CourseDetail() {
   const [activeLessonId, setActiveLessonId] = useState<number | null>(null)
   const [enrolling, setEnrolling] = useState(false)
   const [doneLessonIds, setDoneLessonIds] = useState<Set<number>>(new Set())
-  const [quizError, setQuizError] = useState('')
 
   useEffect(() => {
     if (!courseId) return
@@ -119,19 +116,6 @@ export default function CourseDetail() {
     }
   }
 
-  function handleStartQuiz() {
-    setQuizError('')
-    const target =
-      activeLesson?.contentType === 'QUIZ'
-        ? activeLesson
-        : lessons.find((l) => l.contentType === 'QUIZ')
-    if (!target) {
-      setQuizError(t('noQuizAvailable'))
-      return
-    }
-    router.push(`/quiz/${target.id}`)
-  }
-
   function toggleDone(lessonId: number) {
     setDoneLessonIds((prev) => {
       const next = new Set(prev)
@@ -191,7 +175,6 @@ export default function CourseDetail() {
         enrolled={enrolled}
         enrolling={enrolling}
         onEnroll={handleEnroll}
-        onTakeQuiz={handleStartQuiz}
       />
 
       <Box sx={{ p: { xs: 2, md: 3 } }}>
@@ -203,7 +186,6 @@ export default function CourseDetail() {
               doneLessonIds={doneLessonIds}
               onSelectLesson={setActiveLessonId}
               onToggleDone={toggleDone}
-              onTakeQuiz={handleStartQuiz}
             />
 
             <CourseTabs
@@ -225,9 +207,7 @@ export default function CourseDetail() {
               doneCount={doneCount}
               completionPct={completionPct}
               remainingDuration={remainingDuration}
-              quizError={quizError}
               onSelectLesson={setActiveLessonId}
-              onTakeQuiz={handleStartQuiz}
             />
           </Grid>
         </Grid>
