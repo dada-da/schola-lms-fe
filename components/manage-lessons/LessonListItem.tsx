@@ -6,20 +6,32 @@ import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import Chip from '@mui/material/Chip'
 import IconButton from '@mui/material/IconButton'
+import Button from '@mui/material/Button'
+import Tooltip from '@mui/material/Tooltip'
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
 import OndemandVideoOutlinedIcon from '@mui/icons-material/OndemandVideoOutlined'
 import ArticleOutlinedIcon from '@mui/icons-material/ArticleOutlined'
 import QuizOutlinedIcon from '@mui/icons-material/QuizOutlined'
-import type { Lesson } from './types'
+import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined'
+import CloudOffOutlinedIcon from '@mui/icons-material/CloudOffOutlined'
+import type { Lesson, LessonStatus } from './types'
 
 interface Props {
   lesson: Lesson
   onEdit: (l: Lesson) => void
   onDelete: (l: Lesson) => void
+  onManageQuiz?: (l: Lesson) => void
+  onToggleStatus?: (l: Lesson, next: LessonStatus) => void
 }
 
-export default function LessonListItem({ lesson, onEdit, onDelete }: Props) {
+export default function LessonListItem({
+  lesson,
+  onEdit,
+  onDelete,
+  onManageQuiz,
+  onToggleStatus,
+}: Props) {
   const t = useTranslations('manageLessons')
   const isVideo = lesson.contentType === 'VIDEO'
   const isQuiz = lesson.contentType === 'QUIZ'
@@ -29,6 +41,17 @@ export default function LessonListItem({ lesson, onEdit, onDelete }: Props) {
       ? t('contentTypeQuiz')
       : t('contentTypeText')
   const TypeIcon = isVideo ? OndemandVideoOutlinedIcon : isQuiz ? QuizOutlinedIcon : ArticleOutlinedIcon
+
+  const status = lesson.status ?? 'DRAFT'
+  const isPublished = status === 'PUBLISHED'
+  const statusChipColor: 'success' | 'default' | 'warning' =
+    status === 'PUBLISHED' ? 'success' : status === 'ARCHIVED' ? 'warning' : 'default'
+  const statusLabel =
+    status === 'PUBLISHED'
+      ? t('statusPublished')
+      : status === 'ARCHIVED'
+        ? t('statusArchived')
+        : t('statusDraft')
 
   return (
     <Card>
@@ -64,6 +87,13 @@ export default function LessonListItem({ lesson, onEdit, onDelete }: Props) {
               size="small"
               color="primary"
               sx={{ height: 20, fontSize: '0.65rem', fontWeight: 600 }}
+            />
+            <Chip
+              label={statusLabel}
+              size="small"
+              color={statusChipColor}
+              variant={isPublished ? 'filled' : 'outlined'}
+              sx={{ height: 20, fontSize: '0.65rem', fontWeight: 500 }}
             />
             <Typography
               variant="subtitle1"
@@ -102,9 +132,41 @@ export default function LessonListItem({ lesson, onEdit, onDelete }: Props) {
               ? ` · ${t('duration', { minutes: lesson.durationMinutes })}`
               : ''}
           </Typography>
+
+          {isQuiz && onManageQuiz && (
+            <Box sx={{ mt: 1 }}>
+              <Button
+                size="small"
+                variant="contained"
+                color="primary"
+                startIcon={<QuizOutlinedIcon />}
+                onClick={() => onManageQuiz(lesson)}
+              >
+                {t('manageQuiz')}
+              </Button>
+            </Box>
+          )}
         </Box>
 
         <Box sx={{ display: 'flex', gap: 0.25, flexShrink: 0 }}>
+          {onToggleStatus && (
+            <Tooltip title={isPublished ? t('unpublishLesson') : t('publishLesson')}>
+              <IconButton
+                onClick={() =>
+                  onToggleStatus(lesson, isPublished ? 'DRAFT' : 'PUBLISHED')
+                }
+                size="small"
+                color={isPublished ? 'success' : 'default'}
+                aria-label={isPublished ? t('unpublishLesson') : t('publishLesson')}
+              >
+                {isPublished ? (
+                  <CloudOffOutlinedIcon fontSize="small" />
+                ) : (
+                  <CloudUploadOutlinedIcon fontSize="small" />
+                )}
+              </IconButton>
+            </Tooltip>
+          )}
           <IconButton onClick={() => onEdit(lesson)} size="small" aria-label={t('editLesson')}>
             <EditOutlinedIcon fontSize="small" />
           </IconButton>

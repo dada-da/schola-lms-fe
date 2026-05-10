@@ -65,6 +65,7 @@ export default function CourseDetail() {
   const [activeLessonId, setActiveLessonId] = useState<number | null>(null)
   const [enrolling, setEnrolling] = useState(false)
   const [doneLessonIds, setDoneLessonIds] = useState<Set<number>>(new Set())
+  const [quizError, setQuizError] = useState('')
 
   useEffect(() => {
     if (!courseId) return
@@ -148,6 +149,19 @@ export default function CourseDetail() {
     }
   }
 
+  function handleStartQuiz() {
+    setQuizError('')
+    const target =
+      activeLesson?.contentType === 'QUIZ'
+        ? activeLesson
+        : lessons.find((l) => l.contentType === 'QUIZ')
+    if (!target) {
+      setQuizError(t('noQuizAvailable'))
+      return
+    }
+    router.push(`/quiz/${target.id}`)
+  }
+
   function toggleDone(lessonId: number) {
     setDoneLessonIds((prev) => {
       const next = new Set(prev)
@@ -214,7 +228,9 @@ export default function CourseDetail() {
           <Typography variant="h4" sx={{ fontSize: { xs: '1rem', md: '1.25rem' } }} noWrap>{course.title}</Typography>
         </Box>
         {enrolled ? (
-          <Button variant="contained" color="primary" size="small" sx={{ flexShrink: 0 }} onClick={() => router.push(`/quiz/${course.id}`)}>{t('takeQuiz')}</Button>
+          <Button variant="contained" color="primary" size="small" sx={{ flexShrink: 0 }} onClick={handleStartQuiz}>
+            {t('takeQuiz')}
+          </Button>
         ) : (
           <Button variant="contained" color="primary" size="small" sx={{ flexShrink: 0 }} disabled={enrolling} onClick={handleEnroll}>
             {enrolling ? <CircularProgress size={16} color="inherit" /> : tcourses('enroll')}
@@ -226,7 +242,7 @@ export default function CourseDetail() {
         <Grid container spacing={2} alignItems="flex-start">
           <Grid item xs={12} md={8}>
             <Card sx={{ mb: 2, overflow: 'hidden' }}>
-              <LessonPlayer lesson={activeLesson} takeQuizLabel={t('takeQuiz')} onTakeQuiz={() => router.push(`/quiz/${courseId}`)} />
+              <LessonPlayer lesson={activeLesson} takeQuizLabel={t('takeQuiz')} onTakeQuiz={handleStartQuiz} />
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 2, py: 1.25, bgcolor: '#111827', flexWrap: 'wrap' }}>
                 <Button
                   size="small"
@@ -449,7 +465,10 @@ export default function CourseDetail() {
                   </Grid>
                 ))}
               </Grid>
-              <Button fullWidth variant="contained" color="primary" onClick={() => router.push(`/quiz/${course.id}`)}>{t('takeModuleQuiz')}</Button>
+              <Button fullWidth variant="contained" color="primary" onClick={handleStartQuiz}>
+                {t('takeModuleQuiz')}
+              </Button>
+              {quizError && <Alert severity="warning" sx={{ mt: 1 }}>{quizError}</Alert>}
             </CardContent></Card>
 
             <Card><CardContent>

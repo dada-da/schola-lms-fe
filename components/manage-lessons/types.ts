@@ -1,4 +1,5 @@
 export type ContentType = 'TEXT' | 'VIDEO' | 'QUIZ'
+export type LessonStatus = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED'
 
 export interface Lesson {
   id: number
@@ -8,7 +9,7 @@ export interface Lesson {
   durationMinutes: number | null
   content: string
   contentType: ContentType
-  status?: string
+  status?: LessonStatus
   courseId?: number
   course?: { id: number } | null
   createdAt?: string

@@ -16,7 +16,11 @@
       "Bash(npx tsc *)",
       "Bash(npx eslint *)",
       "Bash(npm run *)",
-      "Bash(python3 -c ' *)"
+      "Bash(python3 -c ' *)",
+      "Bash(find /Users/solis/development/personal/lms-be/src/main/java/org/com/lms_be/feature -type d | head -30)",
+      "Read(//Users/solis/development/personal/lms-be/src/main/java/org/com/lms_be/feature/**)",
+      "Bash(find /Users/solis/development/personal/lms-be -name \"PublishStatusAccess*\" -o -name \"PublishStatus.java\" | head -5)",
+      "Read(//Users/solis/development/personal/lms-be/**)"
     ],
     "additionalDirectories": [
       "/Users/solis/development/personal/schola-lms-next/components"

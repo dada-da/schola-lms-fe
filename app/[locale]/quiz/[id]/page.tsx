@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { useRouter } from '@/i18n/navigation'
@@ -11,207 +11,566 @@ import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
 import LinearProgress from '@mui/material/LinearProgress'
 import Chip from '@mui/material/Chip'
-import TextField from '@mui/material/TextField'
+import CircularProgress from '@mui/material/CircularProgress'
+import Alert from '@mui/material/Alert'
 import DashboardLayout from '@/components/layout/DashboardLayout'
-import { COURSES } from '@/lib/data'
+import type {
+  QuizAnswer,
+  QuizAttempt,
+  QuizAttemptResult,
+  QuizQuestion,
+  QuestionWithAnswers,
+} from '@/components/manage-quiz/types'
 
-const QUESTIONS = [
-  { type: 'mcq', q: 'Which best describes a "semi-structured" interview?', options: ['A rigid script with no deviation', 'A flexible guide with pre-planned questions that allows follow-ups', 'A fully improvised conversation', 'A written questionnaire sent to participants'], correct: 1 },
-  { type: 'truefalse', q: 'Leading questions are acceptable in UX research because they help participants understand what you\'re looking for.', correct: false },
-  { type: 'mcq', q: 'What is the primary purpose of a screener survey?', options: ['Test participants\' knowledge', 'Ensure you recruit participants matching your target profile', 'Measure task completion rates', 'Gather quantitative usability data'], correct: 1 },
-  { type: 'mcq', q: 'The "5-second rule" in UX research refers to:', options: ['How long to wait before asking follow-up questions', 'The optimal test duration', 'Showing designs briefly to test first impressions', 'Maximum time to complete a task'], correct: 2 },
-  { type: 'truefalse', q: 'Affinity mapping groups related observations into themes to synthesize qualitative data.', correct: true },
-  { type: 'short', q: 'In 2–3 sentences, explain the difference between "generative" and "evaluative" research.', correct: null },
-]
+type Phase = 'intro' | 'quiz' | 'results'
 
 export default function QuizPage() {
   const router = useRouter()
-  const params = useParams()
+  const params = useParams<{ id: string }>()
   const t = useTranslations('quiz')
   const tc = useTranslations('common')
-  const course = (COURSES.find(c => c.id === params.id) ?? COURSES[0])!
 
-  const [phase, setPhase] = useState<'intro' | 'quiz' | 'results'>('intro')
+  const lessonId = Number(params?.id)
+
+  const [phase, setPhase] = useState<Phase>('intro')
+  const [questions, setQuestions] = useState<QuestionWithAnswers[]>([])
+  const [pastAttempts, setPastAttempts] = useState<QuizAttempt[]>([])
   const [currentQ, setCurrentQ] = useState(0)
-  const [answers, setAnswers] = useState<Record<number, any>>({})
+  const [selections, setSelections] = useState<Record<number, Set<number>>>({})
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [result, setResult] = useState<QuizAttemptResult | null>(null)
 
-  const answeredCount = Object.keys(answers).length
-  const score = Math.round(QUESTIONS.filter((q, i) => q.correct !== null && answers[i] === q.correct).length / QUESTIONS.filter(q => q.correct !== null).length * 100)
-  const passed = score >= 70
-  const q = QUESTIONS[currentQ]!
+  useEffect(() => {
+    if (!lessonId) {
+      setError(t('notFound'))
+      setLoading(false)
+      return
+    }
+    void load()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lessonId])
 
-  const start = () => { setPhase('quiz') }
-  const reset = () => { setAnswers({}); setCurrentQ(0); setPhase('intro') }
+  async function load() {
+    setLoading(true)
+    setError('')
+    try {
+      const [qsRes, attemptsRes] = await Promise.all([
+        fetch(`/api/question?lessonId=${lessonId}`),
+        fetch(`/api/quiz-attempt?lessonId=${lessonId}`),
+      ])
 
-  if (phase === 'intro') {return (
-    <DashboardLayout>
-      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'center', p: { xs: 2, md: 6 } }}>
-        <Card sx={{ maxWidth: 500, width: '100%' }}><CardContent sx={{ p: 4, textAlign: 'center' }}>
-          <Typography sx={{ fontSize: '3rem', mb: 1.5 }}>📝</Typography>
-          <Chip label={t('moduleQuiz')} size="small" color="primary" sx={{ mb: 2 }} />
-          <Typography variant="h3" sx={{ fontSize: '1.8rem', mb: 1.5 }}>{t('title')}</Typography>
-          <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.75, mb: 3 }}>
-            {t('description')}
-          </Typography>
-          <Grid container spacing={1.5} sx={{ mb: 3 }}>
-            {[{ n: QUESTIONS.length, l: tc('questions') }, { n: '70%', l: tc('passMark') }].map(s => (
-              <Grid item xs={6} key={s.l}>
-                <Box sx={{ bgcolor: 'background.default', borderRadius: 2, py: 1.5 }}>
-                  <Typography sx={{ fontFamily: 'var(--font-serif), serif', fontSize: '1.6rem' }}>{s.n}</Typography>
-                  <Typography variant="caption" sx={{ color: 'text.secondary' }}>{s.l}</Typography>
-                </Box>
+      if (!qsRes.ok) {
+        setError(t('loadFailed'))
+        return
+      }
+      const qs = (await qsRes.json()) as QuizQuestion[]
+      const sorted = [...qs].sort((a, b) => a.sequence - b.sequence)
+
+      const answersResults = await Promise.all(
+        sorted.map((q) => fetch(`/api/answer?questionId=${q.id}`))
+      )
+      const all: QuestionWithAnswers[] = []
+      for (let i = 0; i < sorted.length; i++) {
+        const aRes = answersResults[i]
+        const q = sorted[i]
+        if (!q || !aRes || !aRes.ok) {
+          setError(t('loadFailed'))
+          return
+        }
+        const answers = (await aRes.json()) as QuizAnswer[]
+        all.push({ question: q, answers })
+      }
+      setQuestions(all)
+
+      if (attemptsRes.ok) {
+        const arr = (await attemptsRes.json()) as QuizAttempt[]
+        if (Array.isArray(arr)) setPastAttempts(arr)
+      }
+    } catch {
+      setError(t('loadFailed'))
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const total = questions.length
+  const answeredCount = useMemo(
+    () =>
+      questions.reduce(
+        (n, qa) => n + ((selections[qa.question.id]?.size ?? 0) > 0 ? 1 : 0),
+        0
+      ),
+    [questions, selections]
+  )
+
+  const current = questions[currentQ]
+  const correctCountForCurrent = current
+    ? current.answers.filter((a) => a.correct).length
+    : 1
+  const isMultiSelect = correctCountForCurrent >= 2
+
+  function toggle(questionId: number, answerId: number, multi: boolean) {
+    setSelections((prev) => {
+      const cur = new Set(prev[questionId] ?? [])
+      if (multi) {
+        if (cur.has(answerId)) cur.delete(answerId)
+        else cur.add(answerId)
+      } else {
+        cur.clear()
+        cur.add(answerId)
+      }
+      return { ...prev, [questionId]: cur }
+    })
+  }
+
+  function start() {
+    setSelections({})
+    setCurrentQ(0)
+    setResult(null)
+    setPhase('quiz')
+  }
+
+  async function handleSubmit() {
+    setSubmitting(true)
+    setError('')
+    try {
+      const body = {
+        lessonId,
+        answers: questions.map((qa) => ({
+          questionId: qa.question.id,
+          selectedAnswerIds: Array.from(selections[qa.question.id] ?? []),
+        })),
+      }
+      const res = await fetch('/api/quiz-attempt', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+      if (!res.ok) {
+        const err = await res.json().catch(() => null)
+        setError(err?.message ?? t('submitFailed'))
+        return
+      }
+      const data: QuizAttemptResult = await res.json()
+      setResult(data)
+      setPastAttempts((prev) => [
+        { id: data.id, studentId: data.studentId, lessonId: data.lessonId, attemptAt: data.attemptAt },
+        ...prev,
+      ])
+      setPhase('results')
+    } catch {
+      setError(t('submitFailed'))
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <DashboardLayout>
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+          <CircularProgress />
+        </Box>
+      </DashboardLayout>
+    )
+  }
+
+  if (phase === 'intro') {
+    return (
+      <DashboardLayout>
+        <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'center', p: { xs: 2, md: 6 } }}>
+          <Card sx={{ maxWidth: 540, width: '100%' }}>
+            <CardContent sx={{ p: 4, textAlign: 'center' }}>
+              <Typography sx={{ fontSize: '3rem', mb: 1.5 }}>📝</Typography>
+              <Chip label={t('moduleQuiz')} size="small" color="primary" sx={{ mb: 2 }} />
+              <Typography variant="h3" sx={{ fontSize: '1.8rem', mb: 1.5 }}>
+                {t('title')}
+              </Typography>
+              <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.75, mb: 3 }}>
+                {t('description')}
+              </Typography>
+              <Grid container spacing={1.5} sx={{ mb: 3 }}>
+                <Grid item xs={12}>
+                  <Box sx={{ bgcolor: 'background.default', borderRadius: 2, py: 1.5 }}>
+                    <Typography sx={{ fontFamily: 'var(--font-serif), serif', fontSize: '1.6rem' }}>{total}</Typography>
+                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>{tc('questions')}</Typography>
+                  </Box>
+                </Grid>
               </Grid>
-            ))}
-          </Grid>
-          <Button fullWidth variant="contained" color="primary" size="large" onClick={start}>{t('beginQuiz')}</Button>
-          <Typography variant="caption" sx={{ display: 'block', mt: 1.5, color: 'text.secondary', cursor: 'pointer', '&:hover': { color: 'primary.main' } }} onClick={() => router.push(`/courses/${course.id}`)}>
-            ← {tc('backToCourse')}
-          </Typography>
-        </CardContent></Card>
-      </Box>
-    </DashboardLayout>
-  )}
 
-  if (phase === 'results') {return (
-    <DashboardLayout>
-      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'center', p: { xs: 2, md: 6 } }}>
-        <Card sx={{ maxWidth: 500, width: '100%' }}><CardContent sx={{ p: 4, textAlign: 'center' }}>
-          <Typography sx={{ fontSize: '3rem', mb: 1.5 }}>{passed ? '🎉' : '😔'}</Typography>
-          <Chip label={passed ? t('passed') : t('notQuite')} size="small" color={passed ? 'success' : 'error'} sx={{ mb: 2 }} />
-          <Typography variant="h3" sx={{ fontSize: '1.8rem', mb: 1 }}>{t('yourScore', { score })}</Typography>
-          <Typography variant="body2" sx={{ color: 'text.secondary', mb: 3, lineHeight: 1.75 }}>
-            {passed ? t('passedMessage') : t('failedMessage')}
-          </Typography>
-          <Grid container spacing={1.5} sx={{ mb: 3 }}>
-            {[
-              { n: QUESTIONS.filter((q, i) => q.correct !== null && answers[i] === q.correct).length, l: tc('correct'), color: '#e1f2ef', textColor: '#1f6257' },
-              { n: QUESTIONS.filter(q => q.correct !== null).length - QUESTIONS.filter((q, i) => q.correct !== null && answers[i] === q.correct).length, l: tc('incorrect'), color: '#faeaec', textColor: '#8a3040' },
-            ].map(s => (
-              <Grid item xs={6} key={s.l}>
-                <Box sx={{ bgcolor: s.color, borderRadius: 2, py: 1.5 }}>
-                  <Typography sx={{ fontFamily: 'var(--font-serif), serif', fontSize: '1.6rem', color: s.textColor }}>{s.n}</Typography>
-                  <Typography variant="caption" sx={{ color: s.textColor, opacity: 0.7 }}>{s.l}</Typography>
+              {pastAttempts.length > 0 && (
+                <Box sx={{ mb: 3, textAlign: 'left' }}>
+                  <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                    {t('pastAttempts')}
+                  </Typography>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.75 }}>
+                    {pastAttempts.slice(0, 5).map((a) => (
+                      <Box
+                        key={a.id}
+                        sx={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          bgcolor: 'background.default',
+                          borderRadius: 1.5,
+                          px: 1.5,
+                          py: 1,
+                        }}
+                      >
+                        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                          {new Date(a.attemptAt).toLocaleString()}
+                        </Typography>
+                      </Box>
+                    ))}
+                  </Box>
                 </Box>
+              )}
+
+              {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+
+              <Button
+                fullWidth
+                variant="contained"
+                color="primary"
+                size="large"
+                onClick={start}
+                disabled={total === 0}
+              >
+                {total === 0 ? t('emptyQuiz') : t('beginQuiz')}
+              </Button>
+              <Typography
+                variant="caption"
+                sx={{
+                  display: 'block',
+                  mt: 1.5,
+                  color: 'text.secondary',
+                  cursor: 'pointer',
+                  '&:hover': { color: 'primary.main' },
+                }}
+                onClick={() => router.back()}
+              >
+                ← {tc('backToCourse')}
+              </Typography>
+            </CardContent>
+          </Card>
+        </Box>
+      </DashboardLayout>
+    )
+  }
+
+  if (phase === 'results' && result) {
+    const allCorrect = result.correctCount === result.totalQuestions
+    return (
+      <DashboardLayout>
+        <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'center', p: { xs: 2, md: 6 } }}>
+          <Card sx={{ maxWidth: 500, width: '100%' }}>
+            <CardContent sx={{ p: 4, textAlign: 'center' }}>
+              <Typography sx={{ fontSize: '3rem', mb: 1.5 }}>{allCorrect ? '🎉' : '✅'}</Typography>
+              <Typography variant="h3" sx={{ fontSize: '1.8rem', mb: 1 }}>
+                {t('yourResult', { correct: result.correctCount, total: result.totalQuestions })}
+              </Typography>
+              <Typography variant="body2" sx={{ color: 'text.secondary', mb: 3, lineHeight: 1.75 }}>
+                {t('resultMessage')}
+              </Typography>
+              <Grid container spacing={1.5} sx={{ mb: 3 }}>
+                <Grid item xs={6}>
+                  <Box sx={{ bgcolor: '#e1f2ef', borderRadius: 2, py: 1.5 }}>
+                    <Typography sx={{ fontFamily: 'var(--font-serif), serif', fontSize: '1.6rem', color: '#1f6257' }}>
+                      {result.correctCount}
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: '#1f6257', opacity: 0.7 }}>{tc('correct')}</Typography>
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box sx={{ bgcolor: '#faeaec', borderRadius: 2, py: 1.5 }}>
+                    <Typography sx={{ fontFamily: 'var(--font-serif), serif', fontSize: '1.6rem', color: '#8a3040' }}>
+                      {result.totalQuestions - result.correctCount}
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: '#8a3040', opacity: 0.7 }}>{tc('incorrect')}</Typography>
+                  </Box>
+                </Grid>
               </Grid>
-            ))}
-          </Grid>
-          <Box sx={{ display: 'flex', gap: 1.5, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Button variant="outlined" color="secondary" onClick={() => router.push(`/courses/${course.id}`)}>{tc('backToCourse')}</Button>
-            <Button variant="contained" color="primary" onClick={reset}>{t('retakeQuiz')}</Button>
-          </Box>
-        </CardContent></Card>
-      </Box>
-    </DashboardLayout>
-  )}
+              <Box sx={{ display: 'flex', gap: 1.5, justifyContent: 'center', flexWrap: 'wrap' }}>
+                <Button variant="outlined" color="secondary" onClick={() => router.back()}>
+                  {tc('backToCourse')}
+                </Button>
+                <Button variant="contained" color="primary" onClick={start}>
+                  {t('retakeQuiz')}
+                </Button>
+              </Box>
+            </CardContent>
+          </Card>
+        </Box>
+      </DashboardLayout>
+    )
+  }
 
   return (
     <DashboardLayout>
-      <Box sx={{ px: { xs: 2, md: 3 }, py: 1.5, bgcolor: 'background.paper', borderBottom: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center', gap: { xs: 1, md: 2 }, position: 'sticky', top: 0, zIndex: 40 }}>
-        <Typography variant="body2" sx={{ color: 'text.secondary', flexShrink: 0, display: { xs: 'none', sm: 'block' } }}>{t('title')}</Typography>
-        <LinearProgress variant="determinate" value={((currentQ + 1) / QUESTIONS.length) * 100} sx={{ flex: 1 }} color="primary" />
-        <Typography variant="caption" sx={{ color: 'text.secondary', flexShrink: 0 }}>{currentQ + 1} / {QUESTIONS.length}</Typography>
+      <Box
+        sx={{
+          px: { xs: 2, md: 3 },
+          py: 1.5,
+          bgcolor: 'background.paper',
+          borderBottom: '1px solid',
+          borderColor: 'divider',
+          display: 'flex',
+          alignItems: 'center',
+          gap: { xs: 1, md: 2 },
+          position: 'sticky',
+          top: 0,
+          zIndex: 40,
+        }}
+      >
+        <Typography variant="body2" sx={{ color: 'text.secondary', flexShrink: 0, display: { xs: 'none', sm: 'block' } }}>
+          {t('title')}
+        </Typography>
+        <LinearProgress
+          variant="determinate"
+          value={total === 0 ? 0 : ((currentQ + 1) / total) * 100}
+          sx={{ flex: 1 }}
+          color="primary"
+        />
+        <Typography variant="caption" sx={{ color: 'text.secondary', flexShrink: 0 }}>
+          {currentQ + 1} / {total}
+        </Typography>
       </Box>
 
       <Box sx={{ p: { xs: 2, md: 3 }, maxWidth: 960, mx: 'auto' }}>
+        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
         <Grid container spacing={2} alignItems="flex-start">
           <Grid item xs={12} md={8}>
-            <Card><CardContent sx={{ p: 3 }}>
-              <Typography variant="overline" sx={{ color: 'primary.main', display: 'block', mb: 1 }}>{t('question', { num: currentQ + 1 })}</Typography>
-              <Typography variant="h5" sx={{ fontSize: '1.25rem', lineHeight: 1.4, mb: 3 }}>{q.q}</Typography>
+            <Card>
+              <CardContent sx={{ p: 3 }}>
+                {current && (
+                  <>
+                    <Typography variant="overline" sx={{ color: 'primary.main', display: 'block', mb: 1 }}>
+                      {t('question', { num: currentQ + 1 })}
+                      {isMultiSelect && (
+                        <Typography component="span" variant="caption" sx={{ ml: 1, color: 'text.secondary' }}>
+                          ({t('selectAll')})
+                        </Typography>
+                      )}
+                    </Typography>
+                    <Typography variant="h5" sx={{ fontSize: '1.25rem', lineHeight: 1.4, mb: 3 }}>
+                      {current.question.question}
+                    </Typography>
 
-              {q.type === 'mcq' && (
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 3 }}>
-                  {q.options!.map((opt, i) => (
-                    <Box
-                      key={i}
-                      onClick={() => setAnswers(a => ({ ...a, [currentQ]: i }))}
-                      sx={{
-                        display: 'flex', alignItems: 'center', gap: 1.5, p: 1.5, borderRadius: 2,
-                        border: '1.5px solid', cursor: 'pointer', transition: 'all 0.15s',
-                        borderColor: answers[currentQ] === i ? 'primary.main' : 'divider',
-                        bgcolor: answers[currentQ] === i ? 'primary.light' : 'background.paper',
-                        '&:hover': { borderColor: 'primary.main', bgcolor: 'primary.light' },
-                      }}
-                    >
-                      <Box sx={{ width: 28, height: 28, borderRadius: '50%', bgcolor: answers[currentQ] === i ? 'primary.main' : 'background.default', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                        <Typography sx={{ fontSize: '0.72rem', fontWeight: 700, color: answers[currentQ] === i ? '#fff' : 'text.secondary' }}>{String.fromCharCode(65 + i)}</Typography>
-                      </Box>
-                      <Typography variant="body2" sx={{ color: answers[currentQ] === i ? 'primary.dark' : 'text.primary', fontWeight: answers[currentQ] === i ? 500 : 400 }}>{opt}</Typography>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 3 }}>
+                      {current.answers.map((opt, i) => {
+                        const sel = selections[current.question.id]?.has(opt.id) ?? false
+                        return (
+                          <Box
+                            key={opt.id}
+                            onClick={() => toggle(current.question.id, opt.id, isMultiSelect)}
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 1.5,
+                              p: 1.5,
+                              borderRadius: 2,
+                              border: '1.5px solid',
+                              cursor: 'pointer',
+                              transition: 'all 0.15s',
+                              borderColor: sel ? 'primary.main' : 'divider',
+                              bgcolor: sel ? 'primary.light' : 'background.paper',
+                              '&:hover': { borderColor: 'primary.main', bgcolor: 'primary.light' },
+                            }}
+                          >
+                            <Box
+                              sx={{
+                                width: 28,
+                                height: 28,
+                                borderRadius: isMultiSelect ? 1 : '50%',
+                                bgcolor: sel ? 'primary.main' : 'background.default',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                flexShrink: 0,
+                              }}
+                            >
+                              <Typography
+                                sx={{
+                                  fontSize: '0.72rem',
+                                  fontWeight: 700,
+                                  color: sel ? '#fff' : 'text.secondary',
+                                }}
+                              >
+                                {String.fromCharCode(65 + i)}
+                              </Typography>
+                            </Box>
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                color: sel ? 'primary.dark' : 'text.primary',
+                                fontWeight: sel ? 500 : 400,
+                              }}
+                            >
+                              {opt.answer}
+                            </Typography>
+                          </Box>
+                        )
+                      })}
                     </Box>
-                  ))}
-                </Box>
-              )}
+                  </>
+                )}
 
-              {q.type === 'truefalse' && (
-                <Box sx={{ display: 'flex', gap: 1.5, mb: 3 }}>
-                  {[true, false].map(val => (
-                    <Box
-                      key={String(val)}
-                      onClick={() => setAnswers(a => ({ ...a, [currentQ]: val }))}
-                      sx={{
-                        flex: 1, display: 'flex', alignItems: 'center', gap: 1.5, p: 2, borderRadius: 2,
-                        border: '1.5px solid', cursor: 'pointer', transition: 'all 0.15s',
-                        borderColor: answers[currentQ] === val ? 'primary.main' : 'divider',
-                        bgcolor: answers[currentQ] === val ? 'primary.light' : 'background.paper',
-                        '&:hover': { borderColor: 'primary.main', bgcolor: 'primary.light' },
-                      }}
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                    pt: 2,
+                    borderTop: '1px solid',
+                    borderColor: 'divider',
+                  }}
+                >
+                  <Button
+                    variant="outlined"
+                    color="secondary"
+                    size="small"
+                    disabled={currentQ === 0}
+                    onClick={() => setCurrentQ((q) => q - 1)}
+                  >
+                    ← {tc('prev')}
+                  </Button>
+                  <Box sx={{ display: 'flex', gap: 0.75, flex: 1, justifyContent: 'center', flexWrap: 'wrap' }}>
+                    {questions.map((qa, i) => {
+                      const answered = (selections[qa.question.id]?.size ?? 0) > 0
+                      return (
+                        <Box
+                          key={qa.question.id}
+                          onClick={() => setCurrentQ(i)}
+                          sx={{
+                            width: 8,
+                            height: 8,
+                            borderRadius: '50%',
+                            cursor: 'pointer',
+                            bgcolor:
+                              i === currentQ
+                                ? 'primary.main'
+                                : answered
+                                  ? 'primary.light'
+                                  : 'divider',
+                            border:
+                              i === currentQ
+                                ? 'none'
+                                : answered
+                                  ? '1.5px solid'
+                                  : '1.5px solid',
+                            borderColor:
+                              i === currentQ
+                                ? 'transparent'
+                                : answered
+                                  ? 'primary.main'
+                                  : 'divider',
+                            transition: 'all 0.15s',
+                          }}
+                        />
+                      )
+                    })}
+                  </Box>
+                  {currentQ < total - 1 ? (
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      size="small"
+                      onClick={() => setCurrentQ((q) => q + 1)}
                     >
-                      <Box sx={{ width: 28, height: 28, borderRadius: '50%', bgcolor: answers[currentQ] === val ? 'primary.main' : 'background.default', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <Typography sx={{ fontSize: '0.72rem', fontWeight: 700, color: answers[currentQ] === val ? '#fff' : 'text.secondary' }}>{val ? 'T' : 'F'}</Typography>
-                      </Box>
-                      <Typography variant="body2" sx={{ fontWeight: 500 }}>{val ? t('true') : t('false')}</Typography>
-                    </Box>
-                  ))}
+                      {tc('next')} →
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      size="small"
+                      onClick={handleSubmit}
+                      disabled={submitting}
+                    >
+                      {submitting ? <CircularProgress size={16} color="inherit" /> : tc('submit')}
+                    </Button>
+                  )}
                 </Box>
-              )}
-
-              {q.type === 'short' && (
-                <TextField multiline rows={4} fullWidth placeholder={t('typePlaceholder')} value={answers[currentQ] ?? ''} onChange={e => setAnswers(a => ({ ...a, [currentQ]: e.target.value }))} sx={{ mb: 3 }} />
-              )}
-
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, pt: 2, borderTop: '1px solid', borderColor: 'divider' }}>
-                <Button variant="outlined" color="secondary" size="small" disabled={currentQ === 0} onClick={() => setCurrentQ(q => q - 1)}>← {tc('prev')}</Button>
-                <Box sx={{ display: 'flex', gap: 0.75, flex: 1, justifyContent: 'center', flexWrap: 'wrap' }}>
-                  {QUESTIONS.map((_, i) => (
-                    <Box
-                      key={i}
-                      onClick={() => setCurrentQ(i)}
-                      sx={{ width: 8, height: 8, borderRadius: '50%', cursor: 'pointer', bgcolor: i === currentQ ? 'primary.main' : answers[i] !== undefined ? 'primary.light' : 'divider', border: i === currentQ ? 'none' : answers[i] !== undefined ? '1.5px solid' : '1.5px solid', borderColor: i === currentQ ? 'none' : answers[i] !== undefined ? 'primary.main' : 'divider', transition: 'all 0.15s' }}
-                    />
-                  ))}
-                </Box>
-                {currentQ < QUESTIONS.length - 1
-                  ? <Button variant="contained" color="primary" size="small" onClick={() => setCurrentQ(q => q + 1)}>{tc('next')} →</Button>
-                  : <Button variant="contained" color="primary" size="small" onClick={() => setPhase('results')}>{tc('submit')}</Button>
-                }
-              </Box>
-            </CardContent></Card>
+              </CardContent>
+            </Card>
           </Grid>
 
           <Grid item xs={12} md={4}>
-            <Card sx={{ mb: 1.5 }}><CardContent>
-              <Typography variant="subtitle2" sx={{ mb: 1.5 }}>{t('questionsPanel')}</Typography>
-              <Grid container spacing={0.75}>
-                {QUESTIONS.map((_, i) => (
-                  <Grid item xs={2.4} key={i}>
-                    <Box
-                      onClick={() => setCurrentQ(i)}
-                      sx={{ aspectRatio: '1', borderRadius: 1.5, border: '1.5px solid', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.78rem', fontWeight: 500, transition: 'all 0.15s',
-                        borderColor: i === currentQ ? 'primary.main' : answers[i] !== undefined ? 'primary.main' : 'divider',
-                        bgcolor: i === currentQ ? 'primary.main' : answers[i] !== undefined ? 'primary.light' : 'background.paper',
-                        color: i === currentQ ? '#fff' : answers[i] !== undefined ? 'primary.dark' : 'text.secondary',
-                      }}
-                    >{i + 1}</Box>
-                  </Grid>
-                ))}
-              </Grid>
-            </CardContent></Card>
-            <Card><CardContent>
-              <Typography variant="subtitle2" sx={{ mb: 1 }}>{tc('progress')}</Typography>
-              <Typography variant="body2" sx={{ color: 'text.secondary', mb: 0.75 }}>{t('answeredOf', { answered: answeredCount, total: QUESTIONS.length })}</Typography>
-              <LinearProgress variant="determinate" value={(answeredCount / QUESTIONS.length) * 100} sx={{ mb: 2 }} color="primary" />
-              <Button fullWidth variant="outlined" color="secondary" size="small" onClick={() => setPhase('results')}>{t('submitEarly')}</Button>
-            </CardContent></Card>
+            <Card sx={{ mb: 1.5 }}>
+              <CardContent>
+                <Typography variant="subtitle2" sx={{ mb: 1.5 }}>{t('questionsPanel')}</Typography>
+                <Grid container spacing={0.75}>
+                  {questions.map((qa, i) => {
+                    const answered = (selections[qa.question.id]?.size ?? 0) > 0
+                    return (
+                      <Grid item xs={2.4} key={qa.question.id}>
+                        <Box
+                          onClick={() => setCurrentQ(i)}
+                          sx={{
+                            aspectRatio: '1',
+                            borderRadius: 1.5,
+                            border: '1.5px solid',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '0.78rem',
+                            fontWeight: 500,
+                            transition: 'all 0.15s',
+                            borderColor:
+                              i === currentQ
+                                ? 'primary.main'
+                                : answered
+                                  ? 'primary.main'
+                                  : 'divider',
+                            bgcolor:
+                              i === currentQ
+                                ? 'primary.main'
+                                : answered
+                                  ? 'primary.light'
+                                  : 'background.paper',
+                            color:
+                              i === currentQ
+                                ? '#fff'
+                                : answered
+                                  ? 'primary.dark'
+                                  : 'text.secondary',
+                          }}
+                        >
+                          {i + 1}
+                        </Box>
+                      </Grid>
+                    )
+                  })}
+                </Grid>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent>
+                <Typography variant="subtitle2" sx={{ mb: 1 }}>{tc('progress')}</Typography>
+                <Typography variant="body2" sx={{ color: 'text.secondary', mb: 0.75 }}>
+                  {t('answeredOf', { answered: answeredCount, total })}
+                </Typography>
+                <LinearProgress
+                  variant="determinate"
+                  value={total === 0 ? 0 : (answeredCount / total) * 100}
+                  sx={{ mb: 2 }}
+                  color="primary"
+                />
+                <Button
+                  fullWidth
+                  variant="outlined"
+                  color="secondary"
+                  size="small"
+                  onClick={handleSubmit}
+                  disabled={submitting}
+                >
+                  {submitting ? <CircularProgress size={16} color="inherit" /> : t('submitEarly')}
+                </Button>
+              </CardContent>
+            </Card>
           </Grid>
         </Grid>
       </Box>

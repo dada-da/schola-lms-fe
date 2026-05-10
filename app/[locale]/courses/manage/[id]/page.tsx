@@ -31,6 +31,7 @@ import {
   lessonCourseId,
   type Lesson,
   type LessonFormValues,
+  type LessonStatus,
 } from '@/components/manage-lessons/types'
 import { useAuth } from '@/contexts/auth-context'
 
@@ -166,8 +167,32 @@ export default function ManageCourseDetailPage() {
       const err = await res.json().catch(() => null)
       throw new Error(err?.message ?? tl('saveFailed'))
     }
+    const wasCreate = lessonDialog.mode === 'create'
+    const isQuiz = values.contentType === 'QUIZ'
     setLessonDialog(null)
+    if (wasCreate && isQuiz) {
+      const created = (await res.json().catch(() => null)) as { id?: number } | null
+      if (created?.id) {
+        router.push(`/courses/manage/${courseId}/quiz/${created.id}`)
+        return
+      }
+    }
     await loadAll()
+  }
+
+  async function handleToggleLessonStatus(lesson: Lesson, next: LessonStatus) {
+    setError('')
+    const res = await fetch(`/api/lesson/${lesson.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: next }),
+    })
+    if (!res.ok) {
+      const err = await res.json().catch(() => null)
+      setError(err?.message ?? tl('saveFailed'))
+      return
+    }
+    setLessons((prev) => prev.map((l) => (l.id === lesson.id ? { ...l, status: next } : l)))
   }
 
   async function handleDeleteLesson() {
@@ -365,6 +390,10 @@ export default function ManageCourseDetailPage() {
                   lesson={l}
                   onEdit={(lesson) => setLessonDialog({ mode: 'edit', lesson })}
                   onDelete={setConfirmDelete}
+                  onManageQuiz={(lesson) =>
+                    router.push(`/courses/manage/${courseId}/quiz/${lesson.id}`)
+                  }
+                  onToggleStatus={handleToggleLessonStatus}
                 />
               ))}
             </Box>
