@@ -33,8 +33,20 @@ function decodeIfEncoded(html: string): string {
   return ta.value
 }
 
+const FORBIDDEN_EMBED_TAGS = ['iframe', 'video', 'embed', 'object'] as const
+
+function stripEmbeds(html: string): string {
+  if (!html || typeof DOMParser === 'undefined') return html
+  if (!FORBIDDEN_EMBED_TAGS.some((tag) => new RegExp(`<${tag}\\b`, 'i').test(html))) return html
+  const doc = new DOMParser().parseFromString(html, 'text/html')
+  for (const tag of FORBIDDEN_EMBED_TAGS) {
+    doc.body.querySelectorAll(tag).forEach((el) => el.remove())
+  }
+  return doc.body.innerHTML
+}
+
 export default function LessonTextContent({ lesson }: Props) {
-  const html = useMemo(() => decodeIfEncoded(lesson.content || ''), [lesson.content])
+  const html = useMemo(() => stripEmbeds(decodeIfEncoded(lesson.content || '')), [lesson.content])
 
   return (
     <Box sx={{ p: { xs: 2, md: 3 }, bgcolor: 'background.paper' }}>

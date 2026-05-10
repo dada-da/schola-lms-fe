@@ -15,6 +15,7 @@ interface Props {
   doneLessonIds: Set<number>
   onSelectLesson: (id: number) => void
   onToggleDone: (id: number) => void
+  onLessonCompleted: (id: number) => void
 }
 
 export default function LessonPlayer({
@@ -23,6 +24,7 @@ export default function LessonPlayer({
   doneLessonIds,
   onSelectLesson,
   onToggleDone,
+  onLessonCompleted,
 }: Props) {
   const t = useTranslations('courseDetail')
   const idx = lesson ? lessons.findIndex((l) => l.id === lesson.id) : -1
@@ -31,7 +33,7 @@ export default function LessonPlayer({
 
   return (
     <Card sx={{ mb: 2, overflow: 'hidden' }}>
-      <PlayerSurface lesson={lesson} />
+      <PlayerSurface lesson={lesson} onLessonCompleted={onLessonCompleted} />
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 2, py: 1.25, bgcolor: '#111827', flexWrap: 'wrap' }}>
         <Button
           size="small"
@@ -48,7 +50,7 @@ export default function LessonPlayer({
         <Box sx={{ flex: 1, px: 1, color: 'rgba(255,255,255,0.7)', fontSize: '0.78rem', textAlign: 'center', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {lesson?.title ?? ''}
         </Box>
-        {lesson && (
+        {lesson && lesson.contentType !== 'QUIZ' && (
           doneLessonIds.has(lesson.id) ? (
             <Button
               size="small"
@@ -70,6 +72,12 @@ export default function LessonPlayer({
             </Button>
           )
         )}
+        {lesson && lesson.contentType === 'QUIZ' && doneLessonIds.has(lesson.id) && (
+          <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, color: '#7cd1a8', fontSize: '0.78rem', px: 1 }}>
+            <CheckCircleIcon sx={{ fontSize: 16 }} />
+            {t('completedLesson')}
+          </Box>
+        )}
         <Button
           size="small"
           variant="contained"
@@ -87,7 +95,13 @@ export default function LessonPlayer({
   )
 }
 
-function PlayerSurface({ lesson }: { lesson: Lesson | null }) {
+function PlayerSurface({
+  lesson,
+  onLessonCompleted,
+}: {
+  lesson: Lesson | null
+  onLessonCompleted: (id: number) => void
+}) {
   if (!lesson) {
     return (
       <Box sx={{ height: { xs: 200, md: 280 }, bgcolor: 'secondary.main', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #1a1a2e 0%, #2d3a5e 100%)' }}>
@@ -97,7 +111,7 @@ function PlayerSurface({ lesson }: { lesson: Lesson | null }) {
   }
 
   if (lesson.contentType === 'QUIZ') {
-    return <LessonQuizContent lesson={lesson} />
+    return <LessonQuizContent lesson={lesson} onCompleted={() => onLessonCompleted(lesson.id)} />
   }
 
   if (lesson.contentType === 'VIDEO') {

@@ -44,11 +44,12 @@ export default function CourseDetail() {
     setLoading(true)
     setError('')
     try {
-      const [coursesRes, catsRes, lessonsRes, enrolRes] = await Promise.all([
+      const [coursesRes, catsRes, lessonsRes, enrolRes, progressRes] = await Promise.all([
         fetch('/api/course'),
         fetch('/api/category'),
         fetch(`/api/lesson?courseId=${courseId}`),
         fetch('/api/enrollment'),
+        fetch(`/api/lesson-progress?courseId=${courseId}`),
       ])
 
       if (coursesRes.ok) {
@@ -94,6 +95,13 @@ export default function CourseDetail() {
           Array.isArray(en) && en.some((e) => e.courseId === courseId)
         )
       }
+
+      if (progressRes.ok) {
+        const items = (await progressRes.json()) as Array<{ lessonId: number; completed: boolean }>
+        if (Array.isArray(items)) {
+          setDoneLessonIds(new Set(items.filter((p) => p.completed).map((p) => p.lessonId)))
+        }
+      }
     } catch {
       setError(t('notFound'))
     } finally {
@@ -116,11 +124,44 @@ export default function CourseDetail() {
     }
   }
 
-  function toggleDone(lessonId: number) {
+  async function toggleDone(lessonId: number) {
+    const wasDone = doneLessonIds.has(lessonId)
+    const completed = !wasDone
     setDoneLessonIds((prev) => {
       const next = new Set(prev)
-      if (next.has(lessonId)) next.delete(lessonId)
-      else next.add(lessonId)
+      if (completed) next.add(lessonId)
+      else next.delete(lessonId)
+      return next
+    })
+    try {
+      const res = await fetch('/api/lesson-progress', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lessonId, completed }),
+      })
+      if (!res.ok) {
+        setDoneLessonIds((prev) => {
+          const next = new Set(prev)
+          if (wasDone) next.add(lessonId)
+          else next.delete(lessonId)
+          return next
+        })
+      }
+    } catch {
+      setDoneLessonIds((prev) => {
+        const next = new Set(prev)
+        if (wasDone) next.add(lessonId)
+        else next.delete(lessonId)
+        return next
+      })
+    }
+  }
+
+  function markLessonDone(lessonId: number) {
+    setDoneLessonIds((prev) => {
+      if (prev.has(lessonId)) return prev
+      const next = new Set(prev)
+      next.add(lessonId)
       return next
     })
   }
@@ -186,6 +227,7 @@ export default function CourseDetail() {
               doneLessonIds={doneLessonIds}
               onSelectLesson={setActiveLessonId}
               onToggleDone={toggleDone}
+              onLessonCompleted={markLessonDone}
             />
 
             <CourseTabs

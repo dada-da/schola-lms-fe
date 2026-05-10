@@ -19,12 +19,13 @@ import type {
 
 interface Props {
   lesson: Lesson
+  onCompleted?: () => void
 }
 
 type Selections = Record<number, Set<number>>
 type Locked = Record<number, boolean>
 
-export default function LessonQuizContent({ lesson }: Props) {
+export default function LessonQuizContent({ lesson, onCompleted }: Props) {
   const t = useTranslations('quiz')
   const tc = useTranslations('common')
 
@@ -120,6 +121,7 @@ export default function LessonQuizContent({ lesson }: Props) {
       if (res.ok) {
         const data: QuizAttemptResult = await res.json()
         setResult(data)
+        onCompleted?.()
       }
     } catch {
       // attempt recording is best-effort; UI feedback already shown

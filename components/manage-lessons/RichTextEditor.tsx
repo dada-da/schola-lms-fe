@@ -23,6 +23,22 @@ import UndoIcon from '@mui/icons-material/Undo'
 import RedoIcon from '@mui/icons-material/Redo'
 import HorizontalRuleIcon from '@mui/icons-material/HorizontalRule'
 
+const FORBIDDEN_EMBED_TAGS = ['iframe', 'video', 'embed', 'object'] as const
+
+function stripEmbeds(root: HTMLElement): HTMLElement {
+  for (const tag of FORBIDDEN_EMBED_TAGS) {
+    root.querySelectorAll(tag).forEach((el) => el.remove())
+  }
+  return root
+}
+
+function stripEmbedsFromHtml(html: string): string {
+  if (!html || typeof DOMParser === 'undefined') return html ?? ''
+  if (!FORBIDDEN_EMBED_TAGS.some((tag) => new RegExp(`<${tag}\\b`, 'i').test(html))) return html
+  const doc = new DOMParser().parseFromString(html, 'text/html')
+  return stripEmbeds(doc.body).innerHTML
+}
+
 interface Props {
   value: string
   onChange: (html: string) => void
@@ -45,10 +61,10 @@ export default function RichTextEditor({
       }),
       Placeholder.configure({ placeholder: placeholder ?? '' }),
     ],
-    content: value || '',
+    content: stripEmbedsFromHtml(value || ''),
     editable: !disabled,
     immediatelyRender: false,
-    onUpdate: ({ editor }) => onChange(editor.getHTML()),
+    onUpdate: ({ editor }) => onChange(stripEmbedsFromHtml(editor.getHTML())),
     editorProps: {
       attributes: {
         class: 'rich-text-editor-content',
@@ -58,17 +74,34 @@ export default function RichTextEditor({
       // wraps each line in <p> and entity-escapes the angle brackets — so
       // "<h1>Title</h1>" gets stored as "<p>&lt;h1&gt;Title&lt;/h1&gt;</p>".
       // Detect that case and re-route through the HTML parser instead.
+      // Also strip embed tags (iframe/video/embed/object) from clipboard HTML
+      // before ProseMirror sees them, so videos can never enter the document.
       handlePaste(view, event) {
         const data = event.clipboardData
         if (!data) return false
         const html = data.getData('text/html')
-        if (html.trim()) return false
+        if (html.trim()) {
+          const hasEmbed = FORBIDDEN_EMBED_TAGS.some((tag) =>
+            new RegExp(`<${tag}\\b`, 'i').test(html)
+          )
+          if (!hasEmbed) return false
+          try {
+            const dom = new DOMParser().parseFromString(html, 'text/html').body
+            stripEmbeds(dom)
+            const slice = PMDOMParser.fromSchema(view.state.schema).parseSlice(dom)
+            view.dispatch(view.state.tr.replaceSelection(slice))
+            return true
+          } catch {
+            return false
+          }
+        }
         const text = data.getData('text/plain')
         const trimmed = text.trim()
         const looksLikeHtml = /^<[a-z!]/i.test(trimmed) && /<\/[a-z][a-z0-9]*\s*>\s*$/i.test(trimmed)
         if (!looksLikeHtml) return false
         try {
           const dom = new DOMParser().parseFromString(text, 'text/html').body
+          stripEmbeds(dom)
           const slice = PMDOMParser.fromSchema(view.state.schema).parseSlice(dom)
           view.dispatch(view.state.tr.replaceSelection(slice))
           return true
@@ -82,8 +115,9 @@ export default function RichTextEditor({
   useEffect(() => {
     if (!editor) return
     if (editor.isDestroyed) return
-    if (value === editor.getHTML()) return
-    editor.commands.setContent(value || '', { emitUpdate: false })
+    const sanitized = stripEmbedsFromHtml(value || '')
+    if (sanitized === editor.getHTML()) return
+    editor.commands.setContent(sanitized, { emitUpdate: false })
   }, [value, editor])
 
   useEffect(() => {
