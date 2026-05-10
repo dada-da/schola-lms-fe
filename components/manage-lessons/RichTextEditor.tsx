@@ -3,6 +3,7 @@ import { useEffect } from 'react'
 import { useEditor, EditorContent, type Editor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
+import { DOMParser as PMDOMParser } from '@tiptap/pm/model'
 import Box from '@mui/material/Box'
 import Divider from '@mui/material/Divider'
 import IconButton from '@mui/material/IconButton'
@@ -51,6 +52,29 @@ export default function RichTextEditor({
     editorProps: {
       attributes: {
         class: 'rich-text-editor-content',
+      },
+      // When users paste HTML source (e.g. from a code editor), the clipboard
+      // typically only carries text/plain. ProseMirror's default handler then
+      // wraps each line in <p> and entity-escapes the angle brackets — so
+      // "<h1>Title</h1>" gets stored as "<p>&lt;h1&gt;Title&lt;/h1&gt;</p>".
+      // Detect that case and re-route through the HTML parser instead.
+      handlePaste(view, event) {
+        const data = event.clipboardData
+        if (!data) return false
+        const html = data.getData('text/html')
+        if (html.trim()) return false
+        const text = data.getData('text/plain')
+        const trimmed = text.trim()
+        const looksLikeHtml = /^<[a-z!]/i.test(trimmed) && /<\/[a-z][a-z0-9]*\s*>\s*$/i.test(trimmed)
+        if (!looksLikeHtml) return false
+        try {
+          const dom = new DOMParser().parseFromString(text, 'text/html').body
+          const slice = PMDOMParser.fromSchema(view.state.schema).parseSlice(dom)
+          view.dispatch(view.state.tr.replaceSelection(slice))
+          return true
+        } catch {
+          return false
+        }
       },
     },
   })
